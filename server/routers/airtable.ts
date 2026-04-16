@@ -8,6 +8,7 @@ import {
   getPerformanceData,
   getFinalReports,
   getDashboardStats,
+  approveReport,
 } from "../airtable";
 
 export const airtableRouter = router({
@@ -54,5 +55,12 @@ export const airtableRouter = router({
     .input(z.object({ workflowRecordId: z.string().optional() }))
     .query(async ({ input }) => {
       return getFinalReports(input.workflowRecordId);
+    }),
+
+  /** Approve a Final Report — writes Approved=true back to Airtable */
+  approveReport: publicProcedure
+    .input(z.object({ recordId: z.string() }))
+    .mutation(async ({ input }) => {
+      return approveReport(input.recordId);
     }),
 });

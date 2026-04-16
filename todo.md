@@ -55,3 +55,29 @@
 - [x] Add Performance Data nav item to sidebar
 - [x] Write Vitest tests for Airtable router
 - [x] Checkpoint and deliver
+
+## Enterprise SaaS Upgrade
+- [x] Design system: dark/light theme toggle (persistent), premium color tokens, Inter font
+- [x] Global CSS overhaul: spacing scale, shadow system, animation tokens
+- [x] Topbar component: live sync indicator, theme toggle, breadcrumbs, user menu
+- [x] Enhanced sidebar: collapsible groups, active states, keyboard nav
+- [x] Dashboard: health score card, success rate, AI insights panel (LLM-generated)
+- [x] Dashboard: recent alerts / anomalies section
+- [x] Dashboard: search + filter (status, runtime, date) + sort on workflow table
+- [x] WorkflowDetail: execution timeline (step-by-step visual trace)
+- [x] WorkflowDetail: AI interaction trace view (prompt/response panels)
+- [x] WorkflowDetail: error inspection panel with full error details
+- [x] WorkflowDetail: audit trail visualization
+- [x] Reports: Executive Summary card view
+- [x] Reports: Approve Report button (Airtable PATCH writeback)
+- [x] Reports: Export mock (PDF/JSON download)
+- [x] Enterprise: system logs panel page
+- [x] Enterprise: usage metrics (workflow count, AI call count)
+- [x] Enterprise: billing/plan tiers UI (Starter, Pro, Enterprise)
+- [x] Enterprise: role-based UI placeholders (Admin, Analyst)
+- [x] Polish: skeleton loading states across all pages
+- [x] Polish: empty states with illustrations/icons
+- [x] Polish: micro-interactions (hover, transition, focus)
+- [x] Polish: data freshness / last-updated indicators
+- [x] Tests: 32 Vitest tests passing (0 failures)
+- [x] Checkpoint and deliver

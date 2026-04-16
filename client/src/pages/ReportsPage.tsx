@@ -1,30 +1,42 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import { SectionHeader } from "@/components/AgentOpsUI";
+import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import {
+  AlertTriangle,
+  Bot,
   CheckCircle2,
-  ChevronDown,
-  ChevronRight,
   Clock,
+  Download,
+  ExternalLink,
   FileText,
+  Filter,
   Loader2,
+  RefreshCw,
+  Search,
+  Shield,
+  Sparkles,
+  TrendingUp,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useLocation } from "wouter";
+import { toast } from "sonner";
 
-function formatDate(date: string | null | undefined): string {
-  if (!date) return "—";
-  return new Date(date).toLocaleString(undefined, {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function fmtDateTime(d: string | null | undefined) {
+  if (!d) return "—";
+  return new Date(d).toLocaleString(undefined, {
+    month: "short", day: "numeric", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
   });
 }
 
-type AirtableReport = {
+// ─── Report Card ──────────────────────────────────────────────────────────────
+
+type ReportRow = {
   recordId: string;
   reportId: string;
+  workflowId: string;
   workflowRecordIds: string[];
   executiveSummary: string;
   keyInsights: string;
@@ -34,132 +46,270 @@ type AirtableReport = {
   reportTimestamp: string | null;
 };
 
-function ReportCard({ report }: { report: AirtableReport }) {
+function ReportCard({
+  report,
+  onApprove,
+  isApproving,
+}: {
+  report: ReportRow;
+  onApprove: (recordId: string) => void;
+  isApproving: boolean;
+}) {
+  const [, setLocation] = useLocation();
   const [expanded, setExpanded] = useState(false);
 
+  const exportJSON = () => {
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${report.reportId}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast.success(`Exported ${report.reportId}.json`);
+  };
+
   return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden">
-      {/* Header */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-accent/20 transition-colors text-left"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+    <div className="surface-1 rounded-xl overflow-hidden border border-border hover:border-border/80 transition-all animate-in-up">
+      {/* Card header */}
+      <div className="px-5 py-4 flex items-start justify-between gap-4 border-b border-border/50">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-primary/10 mt-0.5 shrink-0">
             <FileText className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <code className="text-xs font-mono text-primary">{report.reportId}</code>
-              {report.approved && (
-                <span className="inline-flex items-center gap-1 text-xs text-emerald-400">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-semibold font-mono">{report.reportId}</span>
+              <span className="text-xs text-muted-foreground">→</span>
+              <button
+                onClick={() => setLocation(`/workflow/${report.workflowId}`)}
+                className="text-xs text-primary hover:underline font-mono"
+              >
+                {report.workflowId}
+              </button>
+              {report.approved ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   <CheckCircle2 className="w-3 h-3" /> Approved
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <Clock className="w-3 h-3" /> Pending
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {formatDate(report.reportTimestamp)}
-              </span>
-            </div>
+            <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{fmtDateTime(report.reportTimestamp)}</p>
           </div>
         </div>
-        {expanded ? (
-          <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
-        ) : (
-          <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
-        )}
-      </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={exportJSON} title="Export JSON">
+            <Download className="w-3.5 h-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setLocation(`/workflow/${report.workflowId}`)} title="View workflow">
+            <ExternalLink className="w-3.5 h-3.5" />
+          </Button>
+          {!report.approved && (
+            <Button size="sm" className="h-7 text-xs gap-1.5" onClick={() => onApprove(report.recordId)} disabled={isApproving}>
+              {isApproving ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+              Approve
+            </Button>
+          )}
+        </div>
+      </div>
 
-      {/* Expanded content */}
+      {/* Executive Summary — always visible */}
+      <div className="px-5 py-4 border-b border-border/30 bg-primary/3">
+        <div className="flex items-center gap-2 mb-2">
+          <Sparkles className="w-3.5 h-3.5 text-primary" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Executive Summary</span>
+        </div>
+        <p className={`text-sm text-foreground/85 leading-relaxed ${!expanded ? "line-clamp-2" : ""}`}>
+          {report.executiveSummary || <span className="text-muted-foreground italic">No summary available</span>}
+        </p>
+      </div>
+
+      {/* Expanded sections */}
       {expanded && (
-        <div className="border-t border-border">
-          {/* Executive Summary */}
-          <div className="px-5 py-4 border-b border-border bg-blue-500/5">
-            <p className="text-xs font-semibold text-blue-400 uppercase tracking-widest mb-2">
-              Executive Summary
-            </p>
-            <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
-              {report.executiveSummary || "—"}
-            </p>
-          </div>
-
-          {/* Grid: insights + risks */}
-          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border">
-            <div className="px-5 py-4 bg-emerald-500/5">
-              <p className="text-xs font-semibold text-emerald-400 uppercase tracking-widest mb-2">
-                Key Insights
-              </p>
-              <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
-                {report.keyInsights || "—"}
-              </p>
+        <div className="divide-y divide-border/30">
+          <div className="px-5 py-4 bg-blue-500/3">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="w-3.5 h-3.5 text-blue-400" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Key Insights</span>
             </div>
-            <div className="px-5 py-4 bg-red-500/5">
-              <p className="text-xs font-semibold text-red-400 uppercase tracking-widest mb-2">
-                Risks or Anomalies
-              </p>
-              <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
-                {report.risksOrAnomalies || "—"}
-              </p>
-            </div>
+            <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-wrap">{report.keyInsights || "—"}</p>
           </div>
-
-          {/* Recommendation */}
-          <div className="px-5 py-4 border-t border-border bg-amber-500/5">
-            <p className="text-xs font-semibold text-amber-400 uppercase tracking-widest mb-2">
-              Recommendation
-            </p>
-            <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
-              {report.recommendation || "—"}
-            </p>
+          <div className="px-5 py-4 bg-amber-500/3">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Risks & Anomalies</span>
+            </div>
+            <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-wrap">{report.risksOrAnomalies || "—"}</p>
+          </div>
+          <div className="px-5 py-4 bg-emerald-500/3">
+            <div className="flex items-center gap-2 mb-2">
+              <Shield className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Recommendations</span>
+            </div>
+            <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-wrap">{report.recommendation || "—"}</p>
           </div>
         </div>
       )}
+
+      {/* Toggle expand */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full px-5 py-2.5 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors border-t border-border/30"
+      >
+        {expanded ? "Collapse report" : "Expand full report"}
+        <ExternalLink className="w-3 h-3" />
+      </button>
     </div>
   );
 }
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function ReportsPage() {
-  const { data: reports, isLoading } = trpc.airtable.finalReports.useQuery({});
+  const [search, setSearch] = useState("");
+  const [filterApproved, setFilterApproved] = useState<"all" | "approved" | "pending">("all");
+  const utils = trpc.useUtils();
+
+  const { data: reports = [], isLoading, dataUpdatedAt, refetch } = trpc.airtable.finalReports.useQuery(
+    {},
+    { refetchInterval: 60000 }
+  );
+
+  const approveMutation = trpc.airtable.approveReport.useMutation({
+    onSuccess: () => {
+      toast.success("Report approved and synced to Airtable");
+      utils.airtable.finalReports.invalidate();
+    },
+    onError: (err) => toast.error(`Approval failed: ${err.message}`),
+  });
+
+  const filtered = useMemo(() => {
+    return reports.filter(r => {
+      const matchSearch = !search ||
+        r.reportId.toLowerCase().includes(search.toLowerCase()) ||
+        r.workflowId.toLowerCase().includes(search.toLowerCase()) ||
+        r.executiveSummary.toLowerCase().includes(search.toLowerCase());
+      const matchFilter =
+        filterApproved === "all" ||
+        (filterApproved === "approved" && r.approved) ||
+        (filterApproved === "pending" && !r.approved);
+      return matchSearch && matchFilter;
+    });
+  }, [reports, search, filterApproved]);
+
+  const approvedCount = reports.filter(r => r.approved).length;
+  const pendingCount = reports.filter(r => !r.approved).length;
+  const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString() : "—";
 
   return (
-    <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground tracking-tight">
-            Reports
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            AI-generated Weekly Marketing Performance Reports from Airtable — structured with summary, insights, risks, and recommendations
-          </p>
+    <DashboardLayout breadcrumbs={[{ label: "Dashboard", path: "/" }, { label: "Reports" }]}>
+      <div className="max-w-[900px] mx-auto space-y-6">
+        {/* Page header */}
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight">Final Reports</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              AI-generated governance reports · Weekly Marketing Performance Reporting
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground shrink-0"
+            onClick={() => refetch()}
+            disabled={isLoading}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
         </div>
 
-        <SectionHeader
-          title={`${reports?.length ?? 0} Report${reports?.length !== 1 ? "s" : ""}`}
-          description="Click any report to expand the full structured output"
-        />
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-          </div>
-        ) : !reports || reports.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
-            <div className="p-4 rounded-2xl bg-accent text-muted-foreground">
-              <FileText className="w-8 h-8" />
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: "Total Reports", value: reports.length, icon: <FileText className="w-4 h-4 text-primary" />, color: "text-foreground" },
+            { label: "Approved", value: approvedCount, icon: <CheckCircle2 className="w-4 h-4 text-emerald-400" />, color: "text-emerald-400" },
+            { label: "Pending Approval", value: pendingCount, icon: <Clock className="w-4 h-4 text-amber-400" />, color: "text-amber-400" },
+          ].map(stat => (
+            <div key={stat.label} className="surface-1 rounded-xl p-4 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-muted">{stat.icon}</div>
+              <div>
+                <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
+                <p className="text-[11px] text-muted-foreground">{stat.label}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-foreground">No reports yet</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Reports will appear here once workflows complete and generate AI analysis.
+          ))}
+        </div>
+
+        {/* Search + filter bar */}
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search by report ID, workflow ID, or summary content…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full h-9 pl-9 pr-4 rounded-lg bg-muted/40 border border-border text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-colors"
+            />
+          </div>
+          <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/40 border border-border">
+            <Filter className="w-3.5 h-3.5 text-muted-foreground ml-1.5" />
+            {(["all", "approved", "pending"] as const).map(f => (
+              <button
+                key={f}
+                onClick={() => setFilterApproved(f)}
+                className={`px-3 py-1 rounded-md text-xs font-medium capitalize transition-all ${
+                  filterApproved === f ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Data freshness */}
+        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <Bot className="w-3 h-3" />
+          <span>Sourced from Airtable · Last synced {lastUpdated}</span>
+          {filtered.length !== reports.length && (
+            <span className="ml-2 px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+              Showing {filtered.length} of {reports.length}
+            </span>
+          )}
+        </div>
+
+        {/* Reports list */}
+        {isLoading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="skeleton h-48 rounded-xl" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center gap-4 py-24 text-muted-foreground">
+            <FileText className="w-10 h-10 opacity-20" />
+            <div className="text-center">
+              <p className="text-sm font-medium">No reports found</p>
+              <p className="text-xs opacity-60 mt-1">
+                {search || filterApproved !== "all"
+                  ? "Try adjusting your search or filter"
+                  : "Reports appear here after workflow completion and AI generation"}
               </p>
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            {reports.map((report) => (
-              <ReportCard key={report.recordId} report={report} />
+          <div className="space-y-4">
+            {filtered.map(report => (
+              <ReportCard
+                key={report.recordId}
+                report={report}
+                onApprove={(recordId) => approveMutation.mutate({ recordId })}
+                isApproving={approveMutation.isPending && approveMutation.variables?.recordId === report.recordId}
+              />
             ))}
           </div>
         )}

@@ -188,6 +188,7 @@ export interface AirtablePerformanceData {
 export interface AirtableFinalReport {
   recordId: string;
   reportId: string;
+  workflowId: string;
   workflowRecordIds: string[];
   executiveSummary: string;
   keyInsights: string;
@@ -299,6 +300,7 @@ export async function getFinalReports(workflowRecordId?: string): Promise<Airtab
   return records.map((r) => ({
     recordId: r.id,
     reportId: r.fields["Final Report ID"] ?? r.id,
+    workflowId: (r.fields["Workflow ID"] ?? [])[0] ?? "",
     workflowRecordIds: r.fields["Workflow ID"] ?? [],
     executiveSummary: r.fields["Executive Summary"] ?? "",
     keyInsights: r.fields["Key Insights"] ?? "",
@@ -328,5 +330,34 @@ export async function getDashboardStats() {
     failed: byStatus["failed"] ?? 0,
     make: workflows.filter((w) => w.runtime?.toLowerCase() === "make").length,
     n8n: workflows.filter((w) => w.runtime?.toLowerCase() === "n8n").length,
+  };
+}
+
+/** Approve a Final Report record by setting the Approved checkbox to true */
+export async function approveReport(recordId: string): Promise<AirtableFinalReport> {
+  const res = await fetch(`${BASE_URL}/tbldAOS5h3LUBpCB7/${recordId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ fields: { Approved: true } }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Airtable PATCH error (${res.status}): ${err}`);
+  }
+  const r: AirtableRecord<FinalReportFields> = await res.json();
+  return {
+    recordId: r.id,
+    reportId: r.fields["Final Report ID"] ?? r.id,
+    workflowId: (r.fields["Workflow ID"] ?? [])[0] ?? "",
+    workflowRecordIds: r.fields["Workflow ID"] ?? [],
+    executiveSummary: r.fields["Executive Summary"] ?? "",
+    keyInsights: r.fields["Key Insights"] ?? "",
+    risksOrAnomalies: r.fields["Risks or Anomalies"] ?? "",
+    recommendation: r.fields["Recommendation"] ?? "",
+    approved: r.fields["Approved"] ?? false,
+    reportTimestamp: r.fields["Report Timestamp"] ?? null,
   };
 }

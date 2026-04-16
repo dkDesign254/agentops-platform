@@ -10,6 +10,8 @@ import WorkflowDetail from "./pages/WorkflowDetail";
 import ReportsPage from "./pages/ReportsPage";
 import WebhookSimulator from "./pages/WebhookSimulator";
 import PerformanceData from "./pages/PerformanceData";
+import SettingsPage from "./pages/SettingsPage";
+import SystemLogsPage from "./pages/SystemLogsPage";
 
 function Router() {
   return (
@@ -20,6 +22,8 @@ function Router() {
       <Route path="/reports" component={ReportsPage} />
       <Route path="/webhooks" component={WebhookSimulator} />
       <Route path="/performance" component={PerformanceData} />
+      <Route path="/settings" component={SettingsPage} />
+      <Route path="/system-logs" component={SystemLogsPage} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -29,7 +33,7 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
+      <ThemeProvider defaultTheme="dark" switchable>
         <TooltipProvider>
           <Toaster
             theme="dark"
