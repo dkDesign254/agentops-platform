@@ -5,6 +5,7 @@ import { publicProcedure, router } from "./_core/trpc";
 import { workflowsRouter } from "./routers/workflows";
 import { logsRouter } from "./routers/logs";
 import { airtableRouter } from "./routers/airtable";
+import { intelligenceRouter } from "./routers/intelligence";
 
 export const appRouter = router({
   system: systemRouter,
@@ -21,6 +22,7 @@ export const appRouter = router({
   workflows: workflowsRouter,
   logs: logsRouter,
   airtable: airtableRouter,
+  intelligence: intelligenceRouter,
 });
 
 export type AppRouter = typeof appRouter;

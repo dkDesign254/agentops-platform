@@ -20,6 +20,17 @@ import {
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from "recharts";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -203,6 +214,23 @@ export default function ReportsPage() {
   const pendingCount = reports.filter(r => !r.approved).length;
   const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString() : "—";
 
+  // Performance data for charts
+  const { data: perfData = [] } = trpc.airtable.performanceData.useQuery({});
+
+  // Aggregate spend and conversions by reporting period for trend charts
+  const periodMap = new Map<string, { period: string; spend: number; conversions: number; clicks: number }>();
+  for (const row of perfData) {
+    const key = row.reportingPeriod ?? "Unknown";
+    const existing = periodMap.get(key) ?? { period: key, spend: 0, conversions: 0, clicks: 0 };
+    periodMap.set(key, {
+      period: key,
+      spend: existing.spend + row.spend,
+      conversions: existing.conversions + row.conversions,
+      clicks: existing.clicks + row.clicks,
+    });
+  }
+  const trendData = Array.from(periodMap.values()).sort((a, b) => a.period.localeCompare(b.period));
+
   return (
     <DashboardLayout breadcrumbs={[{ label: "Dashboard", path: "/" }, { label: "Reports" }]}>
       <div className="max-w-[900px] mx-auto space-y-6">
@@ -225,6 +253,38 @@ export default function ReportsPage() {
             Refresh
           </Button>
         </div>
+
+        {/* Performance trend charts */}
+        {trendData.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="surface-1 rounded-xl p-4 border border-border">
+              <p className="text-xs font-semibold text-foreground mb-0.5">Spend Trend by Period</p>
+              <p className="text-[11px] text-muted-foreground mb-3">Total marketing spend per reporting period</p>
+              <ResponsiveContainer width="100%" height={160}>
+                <LineChart data={trendData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                  <XAxis dataKey="period" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "11px" }} />
+                  <Line type="monotone" dataKey="spend" stroke="hsl(38 92% 55%)" strokeWidth={2} dot={{ r: 3, fill: "hsl(38 92% 55%)" }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="surface-1 rounded-xl p-4 border border-border">
+              <p className="text-xs font-semibold text-foreground mb-0.5">Conversions by Period</p>
+              <p className="text-[11px] text-muted-foreground mb-3">Goal completions per reporting period</p>
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart data={trendData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                  <XAxis dataKey="period" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "11px" }} />
+                  <Bar dataKey="conversions" fill="hsl(152 69% 45%)" radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-3">

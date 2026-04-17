@@ -12,6 +12,9 @@ import WebhookSimulator from "./pages/WebhookSimulator";
 import PerformanceData from "./pages/PerformanceData";
 import SettingsPage from "./pages/SettingsPage";
 import SystemLogsPage from "./pages/SystemLogsPage";
+import ExecutionLogsPage from "./pages/ExecutionLogsPage";
+import AILogsPage from "./pages/AILogsPage";
+import WorkflowConfig from "./pages/WorkflowConfig";
 
 function Router() {
   return (
@@ -24,6 +27,9 @@ function Router() {
       <Route path="/performance" component={PerformanceData} />
       <Route path="/settings" component={SettingsPage} />
       <Route path="/system-logs" component={SystemLogsPage} />
+      <Route path="/logs" component={ExecutionLogsPage} />
+      <Route path="/ai-logs" component={AILogsPage} />
+      <Route path="/workflows/:id/config" component={WorkflowConfig} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

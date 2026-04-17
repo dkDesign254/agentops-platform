@@ -16,6 +16,8 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import { toast } from "sonner";
+import { useState } from "react";
 
 // ─── Plan tiers ───────────────────────────────────────────────────────────────
 
@@ -111,6 +113,53 @@ const ROLES = [
   },
 ];
 
+// ─── Upgrade CTA ─────────────────────────────────────────────────────────────
+
+function UpgradeCTA({ plan }: { plan: typeof PLANS[number] }) {
+  const [loading, setLoading] = useState(false);
+
+  if (plan.current) {
+    return (
+      <Button variant="outline" size="sm" className="w-full text-xs" disabled>
+        <Check className="w-3 h-3 mr-1.5" /> {plan.cta}
+      </Button>
+    );
+  }
+
+  const handleUpgrade = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      if (plan.name === "Enterprise") {
+        toast.info("Sales enquiry sent", {
+          description: "Our enterprise team will contact you within 1 business day.",
+        });
+      } else {
+        toast.success(`Upgrade to ${plan.name} initiated`, {
+          description: "Billing integration is coming soon. You'll be notified when it's ready.",
+          action: { label: "Dismiss", onClick: () => {} },
+        });
+      }
+    }, 800);
+  };
+
+  return (
+    <Button
+      variant={plan.ctaVariant}
+      size="sm"
+      className="w-full text-xs"
+      onClick={handleUpgrade}
+      disabled={loading}
+    >
+      {loading ? (
+        <><span className="w-3 h-3 mr-1.5 rounded-full border-2 border-current border-t-transparent animate-spin" /> Processing…</>
+      ) : (
+        <>{plan.cta} <ChevronRight className="w-3 h-3 ml-1" /></>
+      )}
+    </Button>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
@@ -204,23 +253,7 @@ export default function SettingsPage() {
                     </li>
                   ))}
                 </ul>
-                <Button
-                  variant={plan.ctaVariant}
-                  size="sm"
-                  className="w-full text-xs"
-                  disabled={plan.current}
-                  onClick={() => {
-                    if (!plan.current) {
-                      window.alert("Billing integration coming soon. Contact sales@agentops.io for early access.");
-                    }
-                  }}
-                >
-                  {plan.current ? (
-                    <><Check className="w-3 h-3 mr-1.5" /> {plan.cta}</>
-                  ) : (
-                    <>{plan.cta} <ChevronRight className="w-3 h-3 ml-1" /></>
-                  )}
-                </Button>
+<UpgradeCTA plan={plan} />
               </div>
             ))}
           </div>

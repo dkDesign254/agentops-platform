@@ -16,10 +16,12 @@ import {
   FileText,
   Loader2,
   RefreshCw,
+  Settings,
   Shield,
   Sparkles,
   Terminal,
   TrendingUp,
+  X,
   Zap,
 } from "lucide-react";
 import { useState } from "react";
@@ -486,10 +488,89 @@ function AuditTrail({ workflow }: { workflow: { workflowId: string; name: string
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+// ─── AI Explain Panel ─────────────────────────────────────────────────────────
+
+function AIExplainPanel({ workflow, onClose }: {
+  workflow: { workflowId: string; name: string; runtime: string; status: string; requestedBy: string; dateRequested: string | null; reportPeriod: string | null; notes: string | null };
+  onClose: () => void;
+}) {
+  const [context, setContext] = useState<"overview" | "errors" | "performance">("overview");
+  const explain = trpc.intelligence.explainWorkflow.useMutation();
+
+  const handleExplain = () => {
+    explain.mutate({
+      workflowId: workflow.workflowId,
+      workflowName: workflow.name,
+      runtime: workflow.runtime,
+      status: workflow.status,
+      context,
+    });
+  };
+
+  return (
+    <div className="surface-1 rounded-xl border border-primary/20 p-5 animate-in-up">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-md bg-primary/10"><Sparkles className="w-4 h-4 text-primary" /></div>
+          <div>
+            <p className="text-sm font-semibold">AI Governance Explain</p>
+            <p className="text-xs text-muted-foreground">LLM-powered workflow analysis</p>
+          </div>
+        </div>
+        <button onClick={onClose} className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+      <div className="flex items-center gap-2 mb-4">
+        {(["overview", "errors", "performance"] as const).map((ctx) => (
+          <button
+            key={ctx}
+            onClick={() => setContext(ctx)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${
+              context === ctx
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+          >
+            {ctx}
+          </button>
+        ))}
+      </div>
+      {explain.data ? (
+        <div className="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{typeof explain.data.explanation === 'string' ? explain.data.explanation : JSON.stringify(explain.data.explanation)}</p>
+          <p className="text-[11px] text-muted-foreground mt-3 font-mono">Context: {explain.data.context}</p>
+        </div>
+      ) : (
+        <div className="bg-muted/20 rounded-lg p-4 border border-border/40 text-center">
+          <p className="text-xs text-muted-foreground mb-3">Select a context and click Explain to get an AI-powered governance analysis of this workflow.</p>
+          <button
+            onClick={handleExplain}
+            disabled={explain.isPending}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-60"
+          >
+            {explain.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+            {explain.isPending ? "Analysing…" : "Explain Workflow"}
+          </button>
+        </div>
+      )}
+      {explain.data && (
+        <button
+          onClick={() => { explain.reset(); }}
+          className="mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Run again
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function WorkflowDetail() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("timeline");
+  const [showExplain, setShowExplain] = useState(false);
 
   const { data: workflow, isLoading } = trpc.airtable.workflowById.useQuery(
     { recordId: id ?? "" },
@@ -540,10 +621,30 @@ export default function WorkflowDetail() {
               </p>
             </div>
           </div>
-          <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 bg-transparent shrink-0" onClick={() => window.location.reload()}>
-            <RefreshCw className="w-3 h-3" /> Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className={`h-8 text-xs gap-1.5 shrink-0 transition-all ${
+                showExplain
+                  ? "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
+                  : "bg-transparent"
+              }`}
+              onClick={() => setShowExplain(!showExplain)}
+            >
+              <Sparkles className="w-3 h-3" />
+              {showExplain ? "Hide AI Explain" : "AI Explain"}
+            </Button>
+            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 bg-transparent shrink-0" onClick={() => setLocation(`/workflows/${id}/config`)}>
+              <Settings className="w-3 h-3" /> Configure
+            </Button>
+          </div>
         </div>
+
+        {/* AI Explain Panel */}
+        {showExplain && workflow && (
+          <AIExplainPanel workflow={workflow} onClose={() => setShowExplain(false)} />
+        )}
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>

@@ -127,35 +127,24 @@ function StatCard({
 
 // ─── AI Insights Panel ────────────────────────────────────────────────────────
 
-function InsightsPanel({ stats }: { stats: { total: number; pending: number; completed: number; failed: number; make: number; n8n: number } | undefined }) {
-  const successRate = stats && stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : null;
-  const pendingRate = stats && stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : null;
+function InsightsPanel() {
+  const { data: insights, isLoading } = trpc.intelligence.dashboardInsights.useQuery(undefined, {
+    refetchInterval: 120000,
+    staleTime: 60000,
+  });
 
-  const insights = useMemo(() => {
-    if (!stats) return [];
-    const items: { icon: React.ReactNode; text: string; type: "info" | "warning" | "success" }[] = [];
-    if (stats.total === 0) {
-      items.push({ icon: <Bot className="w-3.5 h-3.5" />, text: "No workflows detected yet. Create your first Weekly Marketing Performance Reporting workflow to begin governance.", type: "info" });
-    } else {
-      if (successRate !== null && successRate > 0) {
-        items.push({ icon: <CheckCircle2 className="w-3.5 h-3.5" />, text: `${successRate}% of workflows completed successfully. Governance coverage is active.`, type: "success" });
-      }
-      if (stats.pending > 0) {
-        items.push({ icon: <Clock className="w-3.5 h-3.5" />, text: `${stats.pending} workflow${stats.pending > 1 ? "s" : ""} pending execution — awaiting runtime confirmation from Make or n8n.`, type: "warning" });
-      }
-      if (stats.failed > 0) {
-        items.push({ icon: <AlertTriangle className="w-3.5 h-3.5" />, text: `${stats.failed} workflow${stats.failed > 1 ? "s" : ""} failed. Inspect execution logs for error details and anomalies.`, type: "warning" });
-      }
-      const dominant = stats.make >= stats.n8n ? "Make" : "n8n";
-      items.push({ icon: <Zap className="w-3.5 h-3.5" />, text: `${dominant} is the primary runtime (${dominant === "Make" ? stats.make : stats.n8n} of ${stats.total} workflows). Runtime distribution is ${stats.make === stats.n8n ? "balanced" : "skewed"}.`, type: "info" });
-    }
-    return items;
-  }, [stats, successRate, pendingRate]);
+  const typeStyle: Record<string, string> = {
+    success: "text-emerald-400 bg-emerald-500/8 border border-emerald-500/15",
+    warning: "text-amber-400 bg-amber-500/8 border border-amber-500/15",
+    info:    "text-blue-400 bg-blue-500/8 border border-blue-500/15",
+    error:   "text-red-400 bg-red-500/8 border border-red-500/15",
+  };
 
-  const typeStyle = {
-    info:    "text-blue-400 bg-blue-500/8",
-    warning: "text-amber-400 bg-amber-500/8",
-    success: "text-emerald-400 bg-emerald-500/8",
+  const typeIcon: Record<string, React.ReactNode> = {
+    success: <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />,
+    warning: <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />,
+    info:    <Bot className="w-3.5 h-3.5 shrink-0 mt-0.5" />,
+    error:   <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />,
   };
 
   return (
@@ -164,25 +153,109 @@ function InsightsPanel({ stats }: { stats: { total: number; pending: number; com
         <div className="p-1.5 rounded-md bg-primary/15">
           <Sparkles className="w-3.5 h-3.5 text-primary" />
         </div>
-        <div>
-          <p className="text-sm font-semibold">Governance Insights</p>
-          <p className="text-[11px] text-muted-foreground">AI-generated activity summary</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold">AI Governance Insights</p>
+          <p className="text-[11px] text-muted-foreground">LLM-generated · refreshes every 2 min</p>
         </div>
+        {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
       </div>
-      <div className="space-y-2.5">
-        {!stats ? (
+
+      {insights?.summary && (
+        <p className="text-xs text-muted-foreground leading-relaxed mb-3 pb-3 border-b border-border/50">
+          {insights.summary}
+        </p>
+      )}
+
+      <div className="space-y-2">
+        {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="skeleton h-8 rounded-lg" />
+            <div key={i} className="skeleton h-10 rounded-lg" />
           ))
-        ) : (
-          insights.map((ins, i) => (
+        ) : insights?.insights?.length ? (
+          insights.insights.map((ins, i) => (
             <div
               key={i}
-              className={`flex items-start gap-2.5 p-2.5 rounded-lg ${typeStyle[ins.type]} animate-in-up`}
+              className={`flex items-start gap-2.5 p-2.5 rounded-lg ${typeStyle[ins.type] ?? typeStyle.info} animate-in-up`}
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <span className="mt-0.5 shrink-0">{ins.icon}</span>
-              <p className="text-xs leading-relaxed">{ins.text}</p>
+              {typeIcon[ins.type] ?? typeIcon.info}
+              <div className="min-w-0">
+                <p className="text-xs font-semibold mb-0.5">{ins.title}</p>
+                <p className="text-xs leading-relaxed opacity-80">{ins.message}</p>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-xs text-muted-foreground">No insights available yet.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Anomaly Alerts Panel ─────────────────────────────────────────────────────
+
+function AnomalyPanel() {
+  const [, setLocation] = useLocation();
+  const { data: anomalyData, isLoading } = trpc.intelligence.detectAnomalies.useQuery(undefined, {
+    refetchInterval: 90000,
+  });
+
+  const anomalies = anomalyData?.anomalies ?? [];
+  if (!isLoading && anomalies.length === 0) return null;
+
+  const severityStyle: Record<string, string> = {
+    critical: "text-red-400 bg-red-500/8 border border-red-500/20",
+    warning:  "text-amber-400 bg-amber-500/8 border border-amber-500/20",
+    info:     "text-blue-400 bg-blue-500/8 border border-blue-500/20",
+  };
+
+  const severityDot: Record<string, string> = {
+    critical: "bg-red-400 animate-pulse",
+    warning:  "bg-amber-400",
+    info:     "bg-blue-400",
+  };
+
+  return (
+    <div className="surface-1 rounded-xl p-5 border border-amber-500/20">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="p-1.5 rounded-md bg-amber-500/15">
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold">Anomaly Alerts</p>
+          <p className="text-[11px] text-muted-foreground">AI-detected governance issues</p>
+        </div>
+        {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
+        {anomalies.length > 0 && (
+          <span className="text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full">
+            {anomalies.length}
+          </span>
+        )}
+      </div>
+      <div className="space-y-2">
+        {isLoading ? (
+          Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="skeleton h-12 rounded-lg" />
+          ))
+        ) : (
+          anomalies.map((a, i) => (
+            <div
+              key={i}
+              className={`flex items-start gap-3 p-3 rounded-lg ${severityStyle[a.severity] ?? severityStyle.info} animate-in-up cursor-pointer hover:opacity-80 transition-opacity`}
+              style={{ animationDelay: `${i * 50}ms` }}
+              onClick={() => a.workflowId !== "SYSTEM" && setLocation(`/workflows/${a.workflowId}`)}
+            >
+              <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${severityDot[a.severity] ?? "bg-blue-400"}`} />
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-xs font-semibold capitalize">{a.type.replace(/_/g, " ")}</span>
+                  {a.workflowId !== "SYSTEM" && (
+                    <code className="text-[10px] font-mono opacity-60">{a.workflowId}</code>
+                  )}
+                </div>
+                <p className="text-xs opacity-80 leading-relaxed">{a.message}</p>
+              </div>
             </div>
           ))
         )}
@@ -417,7 +490,19 @@ function WorkflowTable() {
                       <RuntimeBadge runtime={wf.runtime} />
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={wf.status} />
+                      <div className="flex items-center gap-1.5">
+                        <StatusBadge status={wf.status} />
+                        {(wf.status?.toLowerCase() === "failed" || wf.status?.toLowerCase() === "error") && (
+                          <span title="Anomaly detected" className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-500/20 border border-red-500/30">
+                            <AlertTriangle className="w-2.5 h-2.5 text-red-400" />
+                          </span>
+                        )}
+                        {wf.notes && wf.notes.toLowerCase().includes("error") && wf.status?.toLowerCase() !== "failed" && (
+                          <span title={`Note: ${wf.notes}`} className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-500/20 border border-amber-500/30">
+                            <AlertTriangle className="w-2.5 h-2.5 text-amber-400" />
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
                       {wf.requestedBy}
@@ -561,8 +646,11 @@ export default function Dashboard() {
           <HealthBar stats={stats} />
 
           {/* Insights */}
-          <InsightsPanel stats={stats} />
+          <InsightsPanel />
         </div>
+
+        {/* Anomaly Alerts */}
+        <AnomalyPanel />
 
         {/* Workflow table */}
         <div className="space-y-3">

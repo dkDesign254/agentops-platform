@@ -81,3 +81,28 @@
 - [x] Polish: data freshness / last-updated indicators
 - [x] Tests: 32 Vitest tests passing (0 failures)
 - [x] Checkpoint and deliver
+
+## AI Workflow Command Center Upgrade
+- [x] Fix 404 routes: Execution Logs (/logs) and AI Logs (/ai-logs) pages
+- [x] Verify all sidebar nav links resolve to working pages
+- [x] Add dedicated ExecutionLogsPage (all logs across all workflows, searchable)
+- [x] Add dedicated AILogsPage (all AI interactions, searchable)
+- [x] Rebuild Dashboard: system health bar (success rate, failures, active, last sync)
+- [x] Dashboard: real LLM-backed Governance Insights panel
+- [x] Dashboard: anomaly detection panel (failures, missing outputs)
+- [x] Dashboard: Recent Issues / alerts section
+- [x] Add WorkflowConfig page: runtime selector, trigger type, AI toggle, Run Now button
+- [x] Add manual workflow simulation (Run Now triggers webhook dispatch)
+- [x] Upgrade ReportsPage: Recharts charts (success rate trend, performance metrics)
+- [x] Reports: LLM-generated executive summary per report
+- [x] Reports: action recommendations section
+- [x] Reports: progression/trend analysis view
+- [x] Reports: JSON export (functional) + PDF export (mock)
+- [x] Add AI Explain button on WorkflowDetail (LLM explains errors/steps)
+- [x] Add AI Governance trace viewer (prompt/response side-by-side)
+- [x] Add anomaly detection indicators on workflow rows
+- [x] Functional pricing UI: Starter/Pro/Enterprise with mock upgrade flow
+- [x] Role-based views: Admin vs Analyst UI differentiation
+- [x] Polish: loading skeletons, empty states, hover transitions across all pages
+- [x] TypeScript clean, 32 tests passing
+- [x] Checkpoint and deliver
