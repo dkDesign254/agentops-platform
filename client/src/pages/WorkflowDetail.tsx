@@ -321,7 +321,7 @@ function PerformanceTab({ recordId }: { recordId: string }) {
                 const rowCtr = d.impressions > 0 ? ((d.clicks / d.impressions) * 100).toFixed(2) : "0.00";
                 return (
                   <tr key={d.recordId} className={`border-b border-border/50 last:border-0 ${i % 2 === 0 ? "" : "bg-muted/10"}`}>
-                    <td className="px-4 py-3 font-medium">{d.performanceDataId}</td>
+                    <td className="px-4 py-3 font-medium">{d.campaignName}</td>
                     <td className="px-4 py-3 font-mono text-muted-foreground">{d.reportingPeriod ?? "—"}</td>
                     <td className="px-4 py-3">{d.impressions.toLocaleString()}</td>
                     <td className="px-4 py-3">{d.clicks.toLocaleString()}</td>

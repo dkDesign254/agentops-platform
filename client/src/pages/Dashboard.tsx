@@ -1,6 +1,14 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -23,6 +31,7 @@ import {
   ExternalLink,
   Filter,
   Loader2,
+  MoreHorizontal,
   Plus,
   RefreshCw,
   Search,
@@ -31,6 +40,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { useLocation } from "wouter";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -267,7 +277,12 @@ function AnomalyPanel() {
 // ─── Health Bar ───────────────────────────────────────────────────────────────
 
 function HealthBar({ stats }: { stats: { total: number; completed: number; failed: number; pending: number; running: number } | undefined }) {
-  if (!stats || stats.total === 0) return null;
+  if (!stats || stats.total === 0) return (
+    <div className="surface-1 rounded-xl p-5">
+      <p className="text-sm font-semibold mb-3">Workflow Health</p>
+      <div className="skeleton h-2 rounded-full" />
+    </div>
+  );
   const pct = (n: number) => `${Math.round((n / stats.total) * 100)}%`;
   return (
     <div className="surface-1 rounded-xl p-5">
@@ -301,6 +316,9 @@ function HealthBar({ stats }: { stats: { total: number; completed: number; faile
 
 // ─── Workflow Table ───────────────────────────────────────────────────────────
 
+const STATUS_OPTIONS = ["Pending", "Running", "Completed", "Failed"] as const;
+type WorkflowStatus = typeof STATUS_OPTIONS[number];
+
 function WorkflowTable() {
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
@@ -308,9 +326,22 @@ function WorkflowTable() {
   const [runtimeFilter, setRuntimeFilter] = useState("all");
   const [sortKey, setSortKey] = useState<SortKey>("dateRequested");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
+  const utils = trpc.useUtils();
   const { data: workflows, isLoading, refetch, isFetching } = trpc.airtable.workflows.useQuery(undefined, {
     refetchInterval: 60000,
+  });
+
+  const updateStatus = trpc.airtable.updateWorkflowStatus.useMutation({
+    onMutate: ({ recordId }) => setUpdatingId(recordId),
+    onSuccess: (updated) => {
+      toast.success(`Status updated to "${updated.status}" for ${updated.name}`);
+      utils.airtable.workflows.invalidate();
+      utils.airtable.dashboardStats.invalidate();
+    },
+    onError: (err) => toast.error(`Failed to update status: ${err.message}`),
+    onSettled: () => setUpdatingId(null),
   });
 
   const filtered = useMemo(() => {
@@ -443,7 +474,7 @@ function WorkflowTable() {
                     </span>
                   </th>
                 ))}
-                <th className="px-4 py-2.5" />
+                <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -526,8 +557,58 @@ function WorkflowTable() {
                         </span>
                       ) : "—"}
                     </td>
-                    <td className="px-4 py-3">
-                      <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                    {/* Actions cell — stop row click propagation */}
+                    <td
+                      className="px-4 py-3"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 opacity-50 hover:opacity-100"
+                            disabled={updatingId === wf.recordId}
+                          >
+                            {updatingId === wf.recordId
+                              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              : <MoreHorizontal className="w-3.5 h-3.5" />
+                            }
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuLabel className="text-[11px]">Set Status</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {STATUS_OPTIONS.map((s) => (
+                            <DropdownMenuItem
+                              key={s}
+                              className={`text-xs cursor-pointer ${wf.status?.toLowerCase() === s.toLowerCase() ? "font-semibold text-primary" : ""}`}
+                              onClick={() =>
+                                updateStatus.mutate({ recordId: wf.recordId, status: s })
+                              }
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full mr-2 shrink-0 ${
+                                s === "Completed" ? "bg-emerald-400" :
+                                s === "Running"   ? "bg-blue-400" :
+                                s === "Failed"    ? "bg-red-400" :
+                                                    "bg-amber-400"
+                              }`} />
+                              {s}
+                              {wf.status?.toLowerCase() === s.toLowerCase() && (
+                                <CheckCircle2 className="w-3 h-3 ml-auto text-primary" />
+                              )}
+                            </DropdownMenuItem>
+                          ))}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-xs cursor-pointer"
+                            onClick={() => setLocation(`/workflows/${wf.recordId}`)}
+                          >
+                            <ArrowUpRight className="w-3 h-3 mr-2" />
+                            View details
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))

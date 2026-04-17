@@ -1,23 +1,28 @@
 import DashboardLayout from "@/components/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import {
   BarChart2,
-  Loader2,
-  TrendingUp,
-  MousePointerClick,
-  Eye,
+  CalendarRange,
   DollarSign,
+  Eye,
+  Loader2,
+  MousePointerClick,
   Target,
+  TrendingUp,
+  X,
 } from "lucide-react";
+import { useMemo, useState } from "react";
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
 } from "recharts";
 
 // ─── Custom Tooltip ───────────────────────────────────────────────────────────
@@ -56,13 +61,47 @@ function StatCard({ label, value, icon: Icon, color }: { label: string; value: s
   );
 }
 
+// ─── Date-range helpers ───────────────────────────────────────────────────────
+
+/**
+ * Parse the start date from a reporting period string.
+ * Supports formats like "2024-03-01 to 2024-03-31" or "2024-03-01".
+ */
+function parseStartDate(period: string | null | undefined): Date | null {
+  if (!period) return null;
+  const raw = period.split(/\s+to\s+/i)[0].trim();
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? null : d;
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function PerformanceData() {
   const { data: perfData, isLoading } = trpc.airtable.performanceData.useQuery({});
 
-  // Aggregate totals
-  const totals = perfData?.reduce(
+  // Date-range filter state
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // Filtered data based on date range
+  const filteredData = useMemo(() => {
+    if (!perfData) return [];
+    if (!startDate && !endDate) return perfData;
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate + "T23:59:59") : null;
+    return perfData.filter((row) => {
+      const d = parseStartDate(row.reportingPeriod);
+      if (!d) return true; // include rows with no period
+      if (start && d < start) return false;
+      if (end && d > end) return false;
+      return true;
+    });
+  }, [perfData, startDate, endDate]);
+
+  const hasFilter = startDate || endDate;
+
+  // Aggregate totals from filtered data
+  const totals = filteredData.reduce(
     (acc, row) => ({
       impressions: acc.impressions + row.impressions,
       clicks: acc.clicks + row.clicks,
@@ -73,19 +112,19 @@ export default function PerformanceData() {
   );
 
   const overallCtr =
-    totals && totals.impressions > 0
+    totals.impressions > 0
       ? ((totals.clicks / totals.impressions) * 100).toFixed(2)
       : "0.00";
 
   const costPerConversion =
-    totals && totals.conversions > 0
+    totals.conversions > 0
       ? (totals.spend / totals.conversions).toFixed(2)
       : "0.00";
 
   // Chart data — truncate campaign names for readability
-  const chartData = (perfData ?? []).map((row) => ({
-    name: row.performanceDataId.length > 18 ? row.performanceDataId.slice(0, 18) + "…" : row.performanceDataId,
-    fullName: row.performanceDataId,
+  const chartData = filteredData.map((row) => ({
+    name: row.campaignName.length > 18 ? row.campaignName.slice(0, 18) + "…" : row.campaignName,
+    fullName: row.campaignName,
     Impressions: row.impressions,
     Clicks: row.clicks,
     Conversions: row.conversions,
@@ -105,8 +144,52 @@ export default function PerformanceData() {
           </p>
         </div>
 
+        {/* Date-range filter */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-xl border border-border bg-card/50">
+          <div className="flex items-center gap-2 text-sm font-medium text-foreground shrink-0">
+            <CalendarRange className="w-4 h-4 text-primary" />
+            Date Range
+          </div>
+          <div className="flex flex-wrap items-center gap-2 flex-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground whitespace-nowrap">From</span>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="h-8 text-xs w-36 bg-muted/30 border-border/60"
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground whitespace-nowrap">To</span>
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="h-8 text-xs w-36 bg-muted/30 border-border/60"
+              />
+            </div>
+            {hasFilter && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 text-xs gap-1 text-muted-foreground hover:text-foreground"
+                onClick={() => { setStartDate(""); setEndDate(""); }}
+              >
+                <X className="w-3 h-3" />
+                Clear
+              </Button>
+            )}
+          </div>
+          {hasFilter && (
+            <span className="text-xs text-primary font-medium shrink-0">
+              {filteredData.length} of {perfData?.length ?? 0} campaigns
+            </span>
+          )}
+        </div>
+
         {/* KPI Cards */}
-        {totals && (
+        {filteredData.length > 0 && (
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
             <StatCard label="Total Impressions" value={totals.impressions.toLocaleString()} icon={Eye} color="text-blue-400" />
             <StatCard label="Total Clicks" value={totals.clicks.toLocaleString()} icon={MousePointerClick} color="text-indigo-400" />
@@ -130,6 +213,18 @@ export default function PerformanceData() {
               <p className="text-sm font-medium text-foreground">No performance data</p>
               <p className="text-xs text-muted-foreground mt-1">
                 Campaign metrics will appear here once data is added to Airtable.
+              </p>
+            </div>
+          </div>
+        ) : filteredData.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
+            <div className="p-4 rounded-2xl bg-accent text-muted-foreground">
+              <CalendarRange className="w-8 h-8" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">No campaigns in this date range</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Try adjusting the start or end date, or clear the filter.
               </p>
             </div>
           </div>
@@ -206,7 +301,10 @@ export default function PerformanceData() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <p className="text-sm font-semibold text-foreground">{perfData.length} Campaign Records</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {filteredData.length} Campaign Record{filteredData.length !== 1 ? "s" : ""}
+                    {hasFilter && <span className="text-muted-foreground font-normal"> (filtered)</span>}
+                  </p>
                   <p className="text-xs text-muted-foreground">Raw performance data rows from Airtable</p>
                 </div>
               </div>
@@ -222,7 +320,7 @@ export default function PerformanceData() {
                     </tr>
                   </thead>
                   <tbody>
-                    {perfData.map((row, idx) => {
+                    {filteredData.map((row, idx) => {
                       const ctr = row.impressions > 0 ? ((row.clicks / row.impressions) * 100).toFixed(2) : "0.00";
                       const convRate = row.clicks > 0 ? ((row.conversions / row.clicks) * 100).toFixed(2) : "0.00";
                       const cpc = row.clicks > 0 ? (row.spend / row.clicks).toFixed(2) : "0.00";
@@ -231,7 +329,7 @@ export default function PerformanceData() {
                           <td className="px-4 py-3 text-xs font-medium text-foreground whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               <TrendingUp className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                              {row.performanceDataId}
+                              {row.campaignName}
                             </div>
                           </td>
                           <td className="px-4 py-3 text-xs text-muted-foreground tabular-nums">{row.impressions.toLocaleString()}</td>

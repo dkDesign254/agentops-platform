@@ -198,7 +198,7 @@ describe("getPerformanceData", () => {
         {
           id: "perfRec001",
           fields: {
-            "Performance Data ID": "Brand Awareness – Q1",
+            "Campaign Name": "Brand Awareness – Q1",
             "Workflow ID": [],
             "Impressions": 84200,
             "Clicks": 1011,
@@ -214,7 +214,7 @@ describe("getPerformanceData", () => {
     const result = await getPerformanceData();
 
     expect(result[0]).toMatchObject({
-      performanceDataId: "Brand Awareness – Q1",
+      campaignName: "Brand Awareness – Q1",
       impressions: 84200,
       clicks: 1011,
       conversions: 42,
@@ -278,5 +278,57 @@ describe("getDashboardStats", () => {
     expect(stats.failed).toBe(1);
     expect(stats.make).toBe(2);
     expect(stats.n8n).toBe(2);
+  });
+});
+
+describe("updateWorkflowStatus", () => {
+  it("PATCHes the Airtable Workflows table and returns updated workflow", async () => {
+    mockFetch.mockResolvedValueOnce(
+      makeSingleResponse("rec001", {
+        "Workflow ID": "WF-2026-001",
+        "Workflow Name": "Weekly Marketing Performance Reporting",
+        "Requested By": "Dustine Kibagendi",
+        "Runtime Used": "n8n",
+        "Status": "Completed",
+        "Date Requested": "2026-04-11T07:55:00.000Z",
+        "Date Completed": "2026-04-11T10:00:00.000Z",
+        "Report Period": "2026-01-26 to 2026-02-01",
+        "Notes": null,
+      })
+    );
+
+    const { updateWorkflowStatus } = await import("./airtable");
+    const result = await updateWorkflowStatus("rec001", "Completed");
+
+    // Verify the PATCH was called with the correct URL and body
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("tblRHBMjoXufOtJLd/rec001"),
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ fields: { Status: "Completed" } }),
+      })
+    );
+
+    // Verify the returned shape
+    expect(result).toMatchObject({
+      recordId: "rec001",
+      workflowId: "WF-2026-001",
+      status: "Completed",
+      runtime: "n8n",
+    });
+  });
+
+  it("throws an error when the Airtable PATCH fails", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 422,
+      text: async () => "INVALID_VALUE_FOR_COLUMN",
+      json: async () => ({}),
+    });
+
+    const { updateWorkflowStatus } = await import("./airtable");
+    await expect(updateWorkflowStatus("rec001", "Running")).rejects.toThrow(
+      "Airtable PATCH error (422)"
+    );
   });
 });

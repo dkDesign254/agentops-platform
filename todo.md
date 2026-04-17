@@ -106,3 +106,10 @@
 - [x] Polish: loading skeletons, empty states, hover transitions across all pages
 - [x] TypeScript clean, 32 tests passing
 - [x] Checkpoint and deliver
+
+## UX Fixes & Feature Additions (Round 4)
+- [x] Fix campaign names: show actual Performance Data ID names instead of Airtable record IDs
+- [x] Auto-refreshing AI Insights panel (every 2 minutes, silent background refresh)
+- [x] Workflow status dropdown on each dashboard row (manual status update → Airtable writeback)
+- [x] Date-range filter on Performance Data charts and table
+- [x] TypeScript clean, 34 tests passing (2 new tests for updateWorkflowStatus), checkpoint

@@ -9,6 +9,7 @@ import {
   getFinalReports,
   getDashboardStats,
   approveReport,
+  updateWorkflowStatus,
 } from "../airtable";
 
 export const airtableRouter = router({
@@ -62,5 +63,17 @@ export const airtableRouter = router({
     .input(z.object({ recordId: z.string() }))
     .mutation(async ({ input }) => {
       return approveReport(input.recordId);
+    }),
+
+  /** Update workflow status — writes Status back to Airtable Workflows table */
+  updateWorkflowStatus: publicProcedure
+    .input(
+      z.object({
+        recordId: z.string(),
+        status: z.enum(["Pending", "Running", "Completed", "Failed"]),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return updateWorkflowStatus(input.recordId, input.status);
     }),
 });

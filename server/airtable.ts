@@ -116,13 +116,15 @@ export interface AIInteractionLogFields {
 }
 
 export interface PerformanceDataFields {
-  "Performance Data ID"?: string;
+  "Campaign Name"?: string;
   "Workflow ID"?: string[];
   "Impressions"?: number;
   "Clicks"?: number;
   "Conversions"?: number;
   "Spend"?: number;
   "Reporting Period"?: string;
+  "CTR (%)"?: number;
+  "ROAS"?: number;
 }
 
 export interface FinalReportFields {
@@ -176,13 +178,15 @@ export interface AirtableAILog {
 
 export interface AirtablePerformanceData {
   recordId: string;
-  performanceDataId: string;
+  campaignName: string;
   workflowRecordIds: string[];
   impressions: number;
   clicks: number;
   conversions: number;
   spend: number;
   reportingPeriod: string | null;
+  ctrPct: number | null;
+  roas: number | null;
 }
 
 export interface AirtableFinalReport {
@@ -281,13 +285,15 @@ export async function getPerformanceData(workflowRecordId?: string): Promise<Air
   const records = await fetchTable<PerformanceDataFields>("tbl7RrluNwF5dfXWd", params);
   return records.map((r) => ({
     recordId: r.id,
-    performanceDataId: r.fields["Performance Data ID"] ?? r.id,
+    campaignName: r.fields["Campaign Name"] ?? r.id,
     workflowRecordIds: r.fields["Workflow ID"] ?? [],
     impressions: r.fields["Impressions"] ?? 0,
     clicks: r.fields["Clicks"] ?? 0,
     conversions: r.fields["Conversions"] ?? 0,
     spend: r.fields["Spend"] ?? 0,
     reportingPeriod: r.fields["Reporting Period"] ?? null,
+    ctrPct: r.fields["CTR (%)"] ?? null,
+    roas: r.fields["ROAS"] ?? null,
   }));
 }
 
@@ -330,6 +336,38 @@ export async function getDashboardStats() {
     failed: byStatus["failed"] ?? 0,
     make: workflows.filter((w) => w.runtime?.toLowerCase() === "make").length,
     n8n: workflows.filter((w) => w.runtime?.toLowerCase() === "n8n").length,
+  };
+}
+
+/** Update the Status field of a Workflow record in Airtable */
+export async function updateWorkflowStatus(
+  recordId: string,
+  status: string,
+): Promise<AirtableWorkflow> {
+  const res = await fetch(`${BASE_URL}/tblRHBMjoXufOtJLd/${recordId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ fields: { Status: status } }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Airtable PATCH error (${res.status}): ${err}`);
+  }
+  const r: AirtableRecord<WorkflowFields> = await res.json();
+  return {
+    recordId: r.id,
+    workflowId: r.fields["Workflow ID"] ?? r.id,
+    name: r.fields["Workflow Name"] ?? "Weekly Marketing Performance Reporting",
+    requestedBy: r.fields["Requested By"] ?? "\u2014",
+    runtime: r.fields["Runtime Used"] ?? "\u2014",
+    status: r.fields["Status"] ?? "Pending",
+    dateRequested: r.fields["Date Requested"] ?? null,
+    dateCompleted: r.fields["Date Completed"] ?? null,
+    reportPeriod: r.fields["Report Period"] ?? null,
+    notes: r.fields["Notes"] ?? null,
   };
 }
 
