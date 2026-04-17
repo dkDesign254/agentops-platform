@@ -147,8 +147,7 @@ export default function WorkflowNew() {
               Weekly Marketing Performance Reporting
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Automated AI-powered analysis of weekly marketing KPIs including CTR, ROAS,
-              conversion rates, and channel performance.
+              Automated AI-powered analysis of weekly marketing key performance indicators — including Click-Through Rate, Return on Ad Spend, conversion rates, and channel performance.
             </p>
           </div>
         </div>
@@ -242,7 +241,7 @@ export default function WorkflowNew() {
                 { step: "1", label: "Workflow intake & unique ID generation" },
                 { step: "2", label: `Runtime routing → ${runtime.toUpperCase()}` },
                 { step: "3", label: "Outbound webhook dispatch to runtime" },
-                { step: "4", label: "AI-powered report generation (LLM)" },
+                { step: "4", label: "AI-powered report generation" },
                 { step: "5", label: "Central execution logging & audit trail" },
               ].map((item) => (
                 <div key={item.step} className="flex items-center gap-3">

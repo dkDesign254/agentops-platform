@@ -97,7 +97,7 @@ function buildSystemLogs(
     level: "info" as LogLevel,
     source: "ai",
     event: "AI Invocation",
-    message: `LLM call via ${a.modelUsed}${a.costNotes ? ` · ${a.costNotes}` : ""}`,
+    message: `AI model call via ${a.modelUsed}${a.costNotes ? ` · ${a.costNotes}` : ""}`,
     workflowId: a.workflowRecordIds[0] ? wfMap.get(a.workflowRecordIds[0]) : undefined,
   }));
 

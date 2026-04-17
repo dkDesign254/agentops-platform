@@ -36,7 +36,7 @@ const TRIGGER_OPTIONS = [
 const STEP_TEMPLATES = [
   { id: "data_extraction", label: "Data Extraction", description: "Pull performance data from sources", enabled: true },
   { id: "data_cleaning", label: "Data Cleaning", description: "Normalise and validate raw data", enabled: true },
-  { id: "ai_analysis", label: "AI Analysis", description: "LLM-powered insights generation", enabled: true },
+  { id: "ai_analysis", label: "AI Analysis", description: "AI-powered insights generation", enabled: true },
   { id: "report_generation", label: "Report Generation", description: "Compile structured final report", enabled: true },
   { id: "notification", label: "Notification Dispatch", description: "Send report to stakeholders", enabled: false },
 ];
@@ -304,7 +304,7 @@ export default function WorkflowConfig() {
                   <div>
                     <Label className="text-xs font-medium">AI Analysis</Label>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Enable LLM-powered insights
+                      Enable AI-powered insights
                     </p>
                   </div>
                   <Switch checked={aiEnabled} onCheckedChange={setAiEnabled} />

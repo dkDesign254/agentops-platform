@@ -293,7 +293,7 @@ function PerformanceTab({ recordId }: { recordId: string }) {
         {[
           { label: "Total Impressions", value: totals.impressions.toLocaleString(), color: "text-blue-400" },
           { label: "Total Clicks", value: totals.clicks.toLocaleString(), color: "text-violet-400" },
-          { label: "CTR", value: `${ctr}%`, color: "text-emerald-400" },
+          { label: "Click-Through Rate", value: `${ctr}%`, color: "text-emerald-400" },
           { label: "Total Spend", value: `$${totals.spend.toLocaleString()}`, color: "text-amber-400" },
         ].map(kpi => (
           <div key={kpi.label} className="surface-1 rounded-xl p-4">
@@ -311,7 +311,7 @@ function PerformanceTab({ recordId }: { recordId: string }) {
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-border bg-muted/20">
-                {["Campaign", "Period", "Impressions", "Clicks", "CTR", "Conversions", "Spend"].map(h => (
+                {["Campaign Name", "Reporting Period", "Impressions", "Clicks", "Click-Through Rate", "Conversions", "Spend (USD)"].map(h => (
                   <th key={h} className="px-4 py-2.5 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -514,7 +514,7 @@ function AIExplainPanel({ workflow, onClose }: {
           <div className="p-1.5 rounded-md bg-primary/10"><Sparkles className="w-4 h-4 text-primary" /></div>
           <div>
             <p className="text-sm font-semibold">AI Governance Explain</p>
-            <p className="text-xs text-muted-foreground">LLM-powered workflow analysis</p>
+            <p className="text-xs text-muted-foreground">AI-powered workflow analysis</p>
           </div>
         </div>
         <button onClick={onClose} className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">

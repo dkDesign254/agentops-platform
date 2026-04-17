@@ -113,3 +113,9 @@
 - [x] Workflow status dropdown on each dashboard row (manual status update → Airtable writeback)
 - [x] Date-range filter on Performance Data charts and table
 - [x] TypeScript clean, 34 tests passing (2 new tests for updateWorkflowStatus), checkpoint
+
+## Readability & Label Fixes (Round 5)
+- [x] Fix campaign names in Performance Data — confirmed API returns correct names; chart now uses full names with wrapping tick labels
+- [x] Expand abbreviations to full words: CTR → Click-Through Rate, ROAS → Return on Ad Spend, CPC → Cost per Click, Conv. Rate → Conversion Rate, LLM → AI model, KPI → key performance indicators
+- [x] Apply full-word labels in chart legends, table headers, KPI cards, and tooltip labels
+- [x] TypeScript clean, 34 tests passing, checkpoint

@@ -165,7 +165,7 @@ function InsightsPanel() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold">AI Governance Insights</p>
-          <p className="text-[11px] text-muted-foreground">LLM-generated · refreshes every 2 min</p>
+          <p className="text-[11px] text-muted-foreground">AI-generated · refreshes every 2 minutes</p>
         </div>
         {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
       </div>
