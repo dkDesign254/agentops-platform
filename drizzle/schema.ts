@@ -7,15 +7,13 @@ import {
   varchar,
 } from "drizzle-orm/mysql-core";
 
-// ─── Users (auth) ────────────────────────────────────────────────────────────
-
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  role: mysqlEnum("role", ["user", "admin", "analyst", "viewer"]).default("viewer").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -24,20 +22,11 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// ─── Workflows ────────────────────────────────────────────────────────────────
-
 export const workflows = mysqlTable("workflows", {
-  id: varchar("id", { length: 36 }).primaryKey(), // UUID
+  id: varchar("id", { length: 36 }).primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   runtime: mysqlEnum("runtime", ["make", "n8n"]).notNull(),
-  status: mysqlEnum("status", [
-    "pending",
-    "running",
-    "completed",
-    "failed",
-  ])
-    .default("pending")
-    .notNull(),
+  status: mysqlEnum("status", ["pending", "running", "completed", "failed"]).default("pending").notNull(),
   requestedBy: varchar("requestedBy", { length: 255 }).notNull(),
   webhookUrl: text("webhookUrl"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -46,8 +35,6 @@ export const workflows = mysqlTable("workflows", {
 
 export type Workflow = typeof workflows.$inferSelect;
 export type InsertWorkflow = typeof workflows.$inferInsert;
-
-// ─── ExecutionLogs ────────────────────────────────────────────────────────────
 
 export const ExecutionLogs = mysqlTable("ExecutionLogs", {
   id: int("id").autoincrement().primaryKey(),
@@ -71,8 +58,6 @@ export const ExecutionLogs = mysqlTable("ExecutionLogs", {
 export type ExecutionLog = typeof ExecutionLogs.$inferSelect;
 export type InsertExecutionLog = typeof ExecutionLogs.$inferInsert;
 
-// ─── AI_Logs ──────────────────────────────────────────────────────────────────
-
 export const AI_Logs = mysqlTable("AI_Logs", {
   id: int("id").autoincrement().primaryKey(),
   workflowId: varchar("workflowId", { length: 36 }).notNull(),
@@ -84,8 +69,6 @@ export const AI_Logs = mysqlTable("AI_Logs", {
 
 export type AILog = typeof AI_Logs.$inferSelect;
 export type InsertAILog = typeof AI_Logs.$inferInsert;
-
-// ─── Reports ──────────────────────────────────────────────────────────────────
 
 export const reports = mysqlTable("reports", {
   id: int("id").autoincrement().primaryKey(),
