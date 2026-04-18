@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../_core/trpc";
+import { protectedProcedure, adminProcedure, router } from "../_core/trpc";
 import {
   getWorkflows,
   getWorkflowByRecordId,
@@ -13,60 +13,51 @@ import {
 } from "../airtable";
 
 export const airtableRouter = router({
-  /** Governance dashboard stats: totals by status and runtime */
-  dashboardStats: publicProcedure.query(async () => {
+  dashboardStats: protectedProcedure.query(async () => {
     return getDashboardStats();
   }),
 
-  /** All workflows from Airtable */
-  workflows: publicProcedure.query(async () => {
+  workflows: protectedProcedure.query(async () => {
     return getWorkflows();
   }),
 
-  /** Single workflow by Airtable record ID */
-  workflowById: publicProcedure
+  workflowById: protectedProcedure
     .input(z.object({ recordId: z.string() }))
     .query(async ({ input }) => {
       return getWorkflowByRecordId(input.recordId);
     }),
 
-  /** Execution logs — optionally filtered by workflow record ID */
-  executionLogs: publicProcedure
+  executionLogs: protectedProcedure
     .input(z.object({ workflowRecordId: z.string().optional() }))
     .query(async ({ input }) => {
       return getExecutionLogs(input.workflowRecordId);
     }),
 
-  /** AI interaction logs — optionally filtered by workflow record ID */
-  aiLogs: publicProcedure
+  aiLogs: protectedProcedure
     .input(z.object({ workflowRecordId: z.string().optional() }))
     .query(async ({ input }) => {
       return getAILogs(input.workflowRecordId);
     }),
 
-  /** Performance data — optionally filtered by workflow record ID */
-  performanceData: publicProcedure
+  performanceData: protectedProcedure
     .input(z.object({ workflowRecordId: z.string().optional() }))
     .query(async ({ input }) => {
       return getPerformanceData(input.workflowRecordId);
     }),
 
-  /** Final reports — optionally filtered by workflow record ID */
-  finalReports: publicProcedure
+  finalReports: protectedProcedure
     .input(z.object({ workflowRecordId: z.string().optional() }))
     .query(async ({ input }) => {
       return getFinalReports(input.workflowRecordId);
     }),
 
-  /** Approve a Final Report — writes Approved=true back to Airtable */
-  approveReport: publicProcedure
+  approveReport: adminProcedure
     .input(z.object({ recordId: z.string() }))
     .mutation(async ({ input }) => {
       return approveReport(input.recordId);
     }),
 
-  /** Update workflow status — writes Status back to Airtable Workflows table */
-  updateWorkflowStatus: publicProcedure
+  updateWorkflowStatus: adminProcedure
     .input(
       z.object({
         recordId: z.string(),
