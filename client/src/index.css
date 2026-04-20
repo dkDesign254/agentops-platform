@@ -5,3 +5,136 @@
 @custom-variant dark (&:is(.dark *));
 
 /* rest unchanged */
+
+/* ===== DESIGN SYSTEM V2 ===== */
+
+:root {
+  --bg: #0B0F14;
+  --surface: #11161C;
+  --surface-elevated: #161C23;
+
+  --border: #1F2933;
+  --border-soft: #1A222C;
+
+  --primary: #6366F1;
+  --primary-soft: rgba(99,102,241,0.1);
+
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+
+  --text-primary: #E6EDF3;
+  --text-secondary: #9BA7B4;
+  --text-muted: #6B7785;
+}
+
+.light {
+  --bg: #F7F9FC;
+  --surface: #FFFFFF;
+  --surface-elevated: #F8FAFC;
+
+  --border: #E5EAF0;
+  --border-soft: #EEF2F6;
+
+  --primary: #4F46E5;
+  --primary-soft: rgba(79,70,229,0.08);
+
+  --success: #059669;
+  --warning: #D97706;
+  --danger: #DC2626;
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+}
+
+/* ===== SURFACES ===== */
+
+.surface-base {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.surface-elevated {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  box-shadow: 0 6px 30px rgba(0,0,0,0.18);
+}
+
+.dark .surface-elevated {
+  box-shadow: 0 6px 30px rgba(0,0,0,0.4);
+}
+
+.surface-glass {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+}
+
+.light .surface-glass {
+  background: rgba(255,255,255,0.72);
+  border: 1px solid rgba(15,23,42,0.06);
+}
+
+/* ===== TEXT ===== */
+
+.text-heading {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.text-section {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.text-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ===== INTERACTIONS ===== */
+
+.card-hover {
+  transition: all 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.22);
+}
+
+.dark .card-hover:hover {
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+/* ===== GLOW SYSTEM ===== */
+
+.glow-primary {
+  box-shadow:
+    0 0 0 1px rgba(99,102,241,0.2),
+    0 0 20px rgba(99,102,241,0.08);
+}
+
+/* ===== ANIMATION ===== */
+
+.animate-in {
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
