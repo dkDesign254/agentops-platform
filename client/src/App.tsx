@@ -1,5 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useTheme } from "@/contexts/ThemeContext";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -36,23 +37,32 @@ function Router() {
   );
 }
 
+function AppShell() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  return (
+    <TooltipProvider>
+      <Toaster
+        theme={isDark ? "dark" : "light"}
+        toastOptions={{
+          style: {
+            background: isDark ? "oklch(0.13 0.018 250)" : "oklch(0.99 0.002 250)",
+            border: isDark ? "1px solid oklch(0.22 0.015 250)" : "1px solid oklch(0.9 0.01 250)",
+            color: isDark ? "oklch(0.93 0.01 250)" : "oklch(0.2 0.02 250)",
+          },
+        }}
+      />
+      <Router />
+    </TooltipProvider>
+  );
+}
+
 function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" switchable>
-        <TooltipProvider>
-          <Toaster
-            theme="dark"
-            toastOptions={{
-              style: {
-                background: "oklch(0.13 0.018 250)",
-                border: "1px solid oklch(0.22 0.015 250)",
-                color: "oklch(0.93 0.01 250)",
-              },
-            }}
-          />
-          <Router />
-        </TooltipProvider>
+        <AppShell />
       </ThemeProvider>
     </ErrorBoundary>
   );
