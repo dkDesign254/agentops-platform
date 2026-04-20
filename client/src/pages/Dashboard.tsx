@@ -98,6 +98,7 @@ function StatusBadge({ status }: { status: string }) {
       label: "Error",
     },
   };
+
   const c = cfg[s] ?? {
     cls: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
     dot: "bg-zinc-400",
@@ -106,7 +107,7 @@ function StatusBadge({ status }: { status: string }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium border ${c.cls}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border ${c.cls}`}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
       {c.label}
@@ -116,27 +117,32 @@ function StatusBadge({ status }: { status: string }) {
 
 function RuntimeBadge({ runtime }: { runtime: string }) {
   const r = runtime?.toLowerCase() ?? "";
+
   if (r === "make") {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-violet-500/10 text-violet-400 border border-violet-500/20">
-        <Zap className="w-2.5 h-2.5" /> Make
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-violet-500/10 text-violet-400 border border-violet-500/20">
+        <Zap className="w-3 h-3" />
+        Make
       </span>
     );
   }
+
   if (r === "n8n") {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">
-        <Zap className="w-2.5 h-2.5" /> n8n
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">
+        <Zap className="w-3 h-3" />
+        n8n
       </span>
     );
   }
+
   return <span className="text-xs text-muted-foreground">{runtime}</span>;
 }
 
 function RoleBadge({ role }: { role: UserRole }) {
   if (role === "admin") {
     return (
-      <Badge className="bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/10">
+      <Badge className="rounded-full bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/10">
         <Shield className="w-3 h-3 mr-1" />
         Admin
       </Badge>
@@ -145,7 +151,7 @@ function RoleBadge({ role }: { role: UserRole }) {
 
   if (role === "analyst") {
     return (
-      <Badge className="bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/10">
+      <Badge className="rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/10">
         <Activity className="w-3 h-3 mr-1" />
         Analyst
       </Badge>
@@ -153,7 +159,7 @@ function RoleBadge({ role }: { role: UserRole }) {
   }
 
   return (
-    <Badge className="bg-zinc-500/10 text-zinc-300 border border-zinc-500/20 hover:bg-zinc-500/10">
+    <Badge className="rounded-full bg-zinc-500/10 text-zinc-300 border border-zinc-500/20 hover:bg-zinc-500/10">
       <Eye className="w-3 h-3 mr-1" />
       Viewer
     </Badge>
@@ -174,28 +180,29 @@ function StatCard({
   color?: "default" | "success" | "warning" | "error" | "info";
 }) {
   const colorMap = {
-    default: "text-primary bg-primary/10",
-    success: "text-emerald-400 bg-emerald-500/10",
-    warning: "text-amber-400 bg-amber-500/10",
-    error: "text-red-400 bg-red-500/10",
-    info: "text-blue-400 bg-blue-500/10",
+    default: "text-primary bg-primary/10 ring-1 ring-primary/10",
+    success: "text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/10",
+    warning: "text-amber-400 bg-amber-500/10 ring-1 ring-amber-500/10",
+    error: "text-red-400 bg-red-500/10 ring-1 ring-red-500/10",
+    info: "text-blue-400 bg-blue-500/10 ring-1 ring-blue-500/10",
   };
 
   return (
-    <div className="surface-1 rounded-xl p-5 card-hover group">
-      <div className="flex items-start justify-between mb-3">
-        <div className={`p-2 rounded-lg ${colorMap[color]}`}>{icon}</div>
+    <div className="surface-elevated card-hover rounded-2xl p-5">
+      <div className="flex items-start justify-between mb-4">
+        <div className={`p-2.5 rounded-2xl ${colorMap[color]}`}>{icon}</div>
         {trend && (
-          <span className="text-[11px] text-emerald-400 flex items-center gap-0.5">
+          <span className="text-[11px] text-emerald-400 flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-1 border border-emerald-500/10">
             <TrendingUp className="w-3 h-3" />
             {trend}
           </span>
         )}
       </div>
-      <p className="text-2xl font-semibold tracking-tight text-foreground animate-in-up">
+
+      <p className="text-3xl font-semibold tracking-tight text-foreground animate-in">
         {value}
       </p>
-      <p className="text-xs text-muted-foreground mt-1">{label}</p>
+      <p className="text-xs text-muted-foreground mt-1.5">{label}</p>
     </div>
   );
 }
@@ -205,11 +212,11 @@ function AccessPanel({ role }: { role: UserRole }) {
   const analyst = role === "analyst" || role === "admin";
 
   return (
-    <div className="surface-1 rounded-xl p-5">
-      <div className="flex items-center justify-between gap-3 mb-4">
+    <div className="surface-elevated rounded-2xl p-6 card-hover">
+      <div className="flex items-center justify-between gap-3 mb-5">
         <div>
-          <p className="text-sm font-semibold">Access Profile</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
+          <p className="text-sm font-semibold text-foreground">Access Profile</p>
+          <p className="text-[11px] text-muted-foreground mt-1">
             Dashboard behaviour based on your assigned role
           </p>
         </div>
@@ -217,33 +224,45 @@ function AccessPanel({ role }: { role: UserRole }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+        <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Plus className={`w-3.5 h-3.5 ${analyst ? "text-emerald-400" : "text-zinc-500"}`} />
-            <p className="text-xs font-semibold">Workflow creation</p>
+            <Plus
+              className={`w-3.5 h-3.5 ${analyst ? "text-emerald-400" : "text-zinc-500"}`}
+            />
+            <p className="text-xs font-semibold text-foreground">Workflow creation</p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {analyst ? "Allowed for analysts and admins." : "Disabled for viewer accounts."}
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {analyst
+              ? "Allowed for analysts and admins."
+              : "Disabled for viewer accounts."}
           </p>
         </div>
 
-        <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+        <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Bot className={`w-3.5 h-3.5 ${analyst ? "text-emerald-400" : "text-zinc-500"}`} />
-            <p className="text-xs font-semibold">Operational logs</p>
+            <Bot
+              className={`w-3.5 h-3.5 ${analyst ? "text-emerald-400" : "text-zinc-500"}`}
+            />
+            <p className="text-xs font-semibold text-foreground">Operational logs</p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {analyst ? "AI logs and execution logs are available." : "Read-only dashboard view only."}
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {analyst
+              ? "AI logs and execution logs are available."
+              : "Read-only dashboard view only."}
           </p>
         </div>
 
-        <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+        <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Shield className={`w-3.5 h-3.5 ${admin ? "text-emerald-400" : "text-zinc-500"}`} />
-            <p className="text-xs font-semibold">Administrative controls</p>
+            <Shield
+              className={`w-3.5 h-3.5 ${admin ? "text-emerald-400" : "text-zinc-500"}`}
+            />
+            <p className="text-xs font-semibold text-foreground">Administrative controls</p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {admin ? "Status updates and governance actions enabled." : "Reserved for admin users only."}
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {admin
+              ? "Status updates and governance actions enabled."
+              : "Reserved for admin users only."}
           </p>
         </div>
       </div>
@@ -253,13 +272,13 @@ function AccessPanel({ role }: { role: UserRole }) {
 
 function AdminControlPanel({ onGoToLogs }: { onGoToLogs: () => void }) {
   return (
-    <div className="surface-1 rounded-xl p-5 border border-red-500/20">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="p-1.5 rounded-md bg-red-500/15">
-          <Shield className="w-3.5 h-3.5 text-red-400" />
+    <div className="surface-elevated rounded-2xl p-6 border border-red-500/20 card-hover">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="p-2 rounded-2xl bg-red-500/15 ring-1 ring-red-500/10">
+          <Shield className="w-4 h-4 text-red-400" />
         </div>
         <div>
-          <p className="text-sm font-semibold">Admin Governance Controls</p>
+          <p className="text-sm font-semibold text-foreground">Admin Governance Controls</p>
           <p className="text-[11px] text-muted-foreground">
             Elevated actions and oversight tools
           </p>
@@ -267,26 +286,26 @@ function AdminControlPanel({ onGoToLogs }: { onGoToLogs: () => void }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="rounded-lg border border-red-500/15 bg-red-500/5 p-3">
-          <p className="text-xs font-semibold mb-1">Status control</p>
-          <p className="text-xs text-muted-foreground">
+        <div className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4">
+          <p className="text-xs font-semibold text-foreground mb-1">Status control</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
             Use the workflow table action menu to update workflow states.
           </p>
         </div>
 
-        <div className="rounded-lg border border-red-500/15 bg-red-500/5 p-3">
-          <p className="text-xs font-semibold mb-1">User governance</p>
-          <p className="text-xs text-muted-foreground">
+        <div className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4">
+          <p className="text-xs font-semibold text-foreground mb-1">User governance</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
             Backend role assignment is active. Admin UI can be layered next.
           </p>
         </div>
 
-        <div className="rounded-lg border border-red-500/15 bg-red-500/5 p-3">
-          <p className="text-xs font-semibold mb-1">Deep diagnostics</p>
+        <div className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4">
+          <p className="text-xs font-semibold text-foreground mb-1">Deep diagnostics</p>
           <Button
             variant="outline"
             size="sm"
-            className="h-7 text-xs mt-2 bg-transparent"
+            className="h-8 text-xs mt-3 bg-transparent rounded-xl"
             onClick={onGoToLogs}
           >
             Open execution logs
@@ -307,10 +326,14 @@ function InsightsPanel() {
   );
 
   const typeStyle: Record<string, string> = {
-    success: "text-emerald-400 bg-emerald-500/8 border border-emerald-500/15",
-    warning: "text-amber-400 bg-amber-500/8 border border-amber-500/15",
-    info: "text-blue-400 bg-blue-500/8 border border-blue-500/15",
-    error: "text-red-400 bg-red-500/8 border border-red-500/15",
+    success:
+      "text-emerald-400 bg-emerald-500/8 border border-emerald-500/15",
+    warning:
+      "text-amber-400 bg-amber-500/8 border border-amber-500/15",
+    info:
+      "text-blue-400 bg-blue-500/8 border border-blue-500/15",
+    error:
+      "text-red-400 bg-red-500/8 border border-red-500/15",
   };
 
   const typeIcon: Record<string, React.ReactNode> = {
@@ -321,44 +344,46 @@ function InsightsPanel() {
   };
 
   return (
-    <div className="insight-card p-5">
+    <div className="surface-elevated rounded-2xl p-6 card-hover glow-primary">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-1.5 rounded-md bg-primary/15">
-          <Sparkles className="w-3.5 h-3.5 text-primary" />
+        <div className="p-2 rounded-2xl bg-primary/15 ring-1 ring-primary/10">
+          <Sparkles className="w-4 h-4 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold">AI Governance Insights</p>
+          <p className="text-sm font-semibold text-foreground">AI Governance Insights</p>
           <p className="text-[11px] text-muted-foreground">
             AI-generated · refreshes every 2 minutes
           </p>
         </div>
-        {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
+        {isLoading && (
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
+        )}
       </div>
 
       {insights?.summary && (
-        <p className="text-xs text-muted-foreground leading-relaxed mb-3 pb-3 border-b border-border/50">
+        <p className="text-xs text-muted-foreground leading-relaxed mb-4 pb-4 border-b border-border/50">
           {insights.summary}
         </p>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="skeleton h-10 rounded-lg" />
+            <div key={i} className="skeleton h-10 rounded-2xl" />
           ))
         ) : insights?.insights?.length ? (
           insights.insights.map((ins, i) => (
             <div
               key={i}
-              className={`flex items-start gap-2.5 p-2.5 rounded-lg ${
+              className={`flex items-start gap-3 p-3 rounded-2xl ${
                 typeStyle[ins.type] ?? typeStyle.info
-              } animate-in-up`}
+              } animate-in`}
               style={{ animationDelay: `${i * 60}ms` }}
             >
               {typeIcon[ins.type] ?? typeIcon.info}
               <div className="min-w-0">
-                <p className="text-xs font-semibold mb-0.5">{ins.title}</p>
-                <p className="text-xs leading-relaxed opacity-80">{ins.message}</p>
+                <p className="text-xs font-semibold mb-1">{ins.title}</p>
+                <p className="text-xs leading-relaxed opacity-85">{ins.message}</p>
               </div>
             </div>
           ))
@@ -395,39 +420,43 @@ function AnomalyPanel() {
   };
 
   return (
-    <div className="surface-1 rounded-xl p-5 border border-amber-500/20">
+    <div className="surface-elevated rounded-2xl p-6 border border-amber-500/20 card-hover">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-1.5 rounded-md bg-amber-500/15">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+        <div className="p-2 rounded-2xl bg-amber-500/15 ring-1 ring-amber-500/10">
+          <AlertTriangle className="w-4 h-4 text-amber-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold">Anomaly Alerts</p>
+          <p className="text-sm font-semibold text-foreground">Anomaly Alerts</p>
           <p className="text-[11px] text-muted-foreground">
             AI-detected governance issues
           </p>
         </div>
-        {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
+        {isLoading && (
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
+        )}
         {anomalies.length > 0 && (
-          <span className="text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full">
+          <span className="text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full">
             {anomalies.length}
           </span>
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         {isLoading ? (
           Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="skeleton h-12 rounded-lg" />
+            <div key={i} className="skeleton h-12 rounded-2xl" />
           ))
         ) : (
           anomalies.map((a, i) => (
             <div
               key={i}
-              className={`flex items-start gap-3 p-3 rounded-lg ${
+              className={`flex items-start gap-3 p-3 rounded-2xl ${
                 severityStyle[a.severity] ?? severityStyle.info
-              } animate-in-up cursor-pointer hover:opacity-80 transition-opacity`}
+              } animate-in cursor-pointer hover:opacity-90 transition-opacity`}
               style={{ animationDelay: `${i * 50}ms` }}
-              onClick={() => a.workflowId !== "SYSTEM" && setLocation(`/workflows/${a.workflowId}`)}
+              onClick={() =>
+                a.workflowId !== "SYSTEM" && setLocation(`/workflows/${a.workflowId}`)
+              }
             >
               <span
                 className={`w-2 h-2 rounded-full mt-1 shrink-0 ${
@@ -435,15 +464,17 @@ function AnomalyPanel() {
                 }`}
               />
               <div className="min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
+                <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-semibold capitalize">
                     {a.type.replace(/_/g, " ")}
                   </span>
                   {a.workflowId !== "SYSTEM" && (
-                    <code className="text-[10px] font-mono opacity-60">{a.workflowId}</code>
+                    <code className="text-[10px] font-mono opacity-60">
+                      {a.workflowId}
+                    </code>
                   )}
                 </div>
-                <p className="text-xs opacity-80 leading-relaxed">{a.message}</p>
+                <p className="text-xs opacity-85 leading-relaxed">{a.message}</p>
               </div>
             </div>
           ))
@@ -468,8 +499,8 @@ function HealthBar({
 }) {
   if (!stats || stats.total === 0) {
     return (
-      <div className="surface-1 rounded-xl p-5">
-        <p className="text-sm font-semibold mb-3">Workflow Health</p>
+      <div className="surface-elevated rounded-2xl p-6">
+        <p className="text-sm font-semibold text-foreground mb-3">Workflow Health</p>
         <div className="skeleton h-2 rounded-full" />
       </div>
     );
@@ -478,28 +509,40 @@ function HealthBar({
   const pct = (n: number) => `${Math.round((n / stats.total) * 100)}%`;
 
   return (
-    <div className="surface-1 rounded-xl p-5">
+    <div className="surface-elevated rounded-2xl p-6 card-hover">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-semibold">Workflow Health</p>
+        <p className="text-sm font-semibold text-foreground">Workflow Health</p>
         <span className="text-xs text-muted-foreground">{stats.total} total</span>
       </div>
 
       <div className="h-2 rounded-full overflow-hidden flex gap-0.5 bg-muted/40">
         {stats.completed > 0 && (
-          <div className="bg-emerald-500 rounded-full transition-all" style={{ width: pct(stats.completed) }} />
+          <div
+            className="bg-emerald-500 rounded-full transition-all"
+            style={{ width: pct(stats.completed) }}
+          />
         )}
         {stats.running > 0 && (
-          <div className="bg-blue-500 rounded-full transition-all" style={{ width: pct(stats.running) }} />
+          <div
+            className="bg-blue-500 rounded-full transition-all"
+            style={{ width: pct(stats.running) }}
+          />
         )}
         {stats.pending > 0 && (
-          <div className="bg-amber-500 rounded-full transition-all" style={{ width: pct(stats.pending) }} />
+          <div
+            className="bg-amber-500 rounded-full transition-all"
+            style={{ width: pct(stats.pending) }}
+          />
         )}
         {stats.failed > 0 && (
-          <div className="bg-red-500 rounded-full transition-all" style={{ width: pct(stats.failed) }} />
+          <div
+            className="bg-red-500 rounded-full transition-all"
+            style={{ width: pct(stats.failed) }}
+          />
         )}
       </div>
 
-      <div className="flex items-center gap-4 mt-3 flex-wrap">
+      <div className="flex items-center gap-4 mt-4 flex-wrap">
         {[
           { label: "Completed", count: stats.completed, color: "bg-emerald-500" },
           { label: "Running", count: stats.running, color: "bg-blue-500" },
@@ -521,8 +564,6 @@ function HealthBar({
 
 const STATUS_OPTIONS = ["Pending", "Running", "Completed", "Failed"] as const;
 
-type WorkflowStatus = typeof STATUS_OPTIONS[number];
-
 function WorkflowTable({ role }: { role: UserRole }) {
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
@@ -535,12 +576,10 @@ function WorkflowTable({ role }: { role: UserRole }) {
   const canAdminister = role === "admin";
 
   const utils = trpc.useUtils();
-  const { data: workflows, isLoading, refetch, isFetching } = trpc.airtable.workflows.useQuery(
-    undefined,
-    {
+  const { data: workflows, isLoading, refetch, isFetching } =
+    trpc.airtable.workflows.useQuery(undefined, {
       refetchInterval: 60000,
-    }
-  );
+    });
 
   const updateStatus = trpc.airtable.updateWorkflowStatus.useMutation({
     onMutate: ({ recordId }) => setUpdatingId(recordId),
@@ -555,6 +594,7 @@ function WorkflowTable({ role }: { role: UserRole }) {
 
   const filtered = useMemo(() => {
     if (!workflows) return [];
+
     return workflows
       .filter((w) => {
         const q = search.toLowerCase();
@@ -564,8 +604,12 @@ function WorkflowTable({ role }: { role: UserRole }) {
           w.name.toLowerCase().includes(q) ||
           w.requestedBy.toLowerCase().includes(q) ||
           (w.reportPeriod ?? "").toLowerCase().includes(q);
-        const matchStatus = statusFilter === "all" || w.status.toLowerCase() === statusFilter;
-        const matchRuntime = runtimeFilter === "all" || w.runtime.toLowerCase() === runtimeFilter;
+
+        const matchStatus =
+          statusFilter === "all" || w.status.toLowerCase() === statusFilter;
+        const matchRuntime =
+          runtimeFilter === "all" || w.runtime.toLowerCase() === runtimeFilter;
+
         return matchSearch && matchStatus && matchRuntime;
       })
       .sort((a, b) => {
@@ -624,70 +668,73 @@ function WorkflowTable({ role }: { role: UserRole }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-          <Input
-            placeholder="Search workflows, IDs, requesters…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-8 text-xs bg-muted/30 border-border/60"
-          />
-        </div>
+      <div className="surface-elevated rounded-2xl p-4">
+        <div className="flex flex-col xl:flex-row items-start xl:items-center gap-3">
+          <div className="relative flex-1 w-full xl:max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder="Search workflows, IDs, requesters…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-9 text-xs bg-muted/30 border-border/60 rounded-xl"
+            />
+          </div>
 
-        <div className="flex items-center gap-2">
-          <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-8 text-xs w-32 bg-muted/30 border-border/60">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="running">Running</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="failed">Failed</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-wrap items-center gap-2">
+            <Filter className="w-3.5 h-3.5 text-muted-foreground" />
 
-          <Select value={runtimeFilter} onValueChange={setRuntimeFilter}>
-            <SelectTrigger className="h-8 text-xs w-28 bg-muted/30 border-border/60">
-              <SelectValue placeholder="Runtime" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All runtimes</SelectItem>
-              <SelectItem value="make">Make</SelectItem>
-              <SelectItem value="n8n">n8n</SelectItem>
-            </SelectContent>
-          </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="h-9 text-xs w-32 bg-muted/30 border-border/60 rounded-xl">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="running">Running</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="failed">Failed</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`} />
-          </Button>
-        </div>
+            <Select value={runtimeFilter} onValueChange={setRuntimeFilter}>
+              <SelectTrigger className="h-9 text-xs w-28 bg-muted/30 border-border/60 rounded-xl">
+                <SelectValue placeholder="Runtime" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All runtimes</SelectItem>
+                <SelectItem value="make">Make</SelectItem>
+                <SelectItem value="n8n">n8n</SelectItem>
+              </SelectContent>
+            </Select>
 
-        <div className="ml-auto">
-          <span className="text-xs text-muted-foreground">
-            {filtered.length} of {workflows?.length ?? 0} workflows
-          </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-xl"
+              onClick={() => refetch()}
+              disabled={isFetching}
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
+
+          <div className="xl:ml-auto">
+            <span className="text-xs text-muted-foreground">
+              {filtered.length} of {workflows?.length ?? 0} workflows
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="surface-1 rounded-xl overflow-hidden">
+      <div className="surface-elevated rounded-2xl overflow-hidden card-hover">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/20">
+              <tr className="border-b border-border bg-muted/15">
                 {cols.map((col) => (
                   <th
                     key={col.label}
-                    className={`text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap ${
+                    className={`text-left px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.12em] whitespace-nowrap ${
                       col.sortable
                         ? "cursor-pointer select-none hover:text-foreground transition-colors"
                         : ""
@@ -701,7 +748,7 @@ function WorkflowTable({ role }: { role: UserRole }) {
                   </th>
                 ))}
                 {canAdminister && (
-                  <th className="px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-4 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.12em]">
                     Actions
                   </th>
                 )}
@@ -713,8 +760,8 @@ function WorkflowTable({ role }: { role: UserRole }) {
                 Array.from({ length: 6 }).map((_, i) => (
                   <tr key={i} className="border-b border-border/50">
                     {Array.from({ length: canAdminister ? 9 : 8 }).map((_, j) => (
-                      <td key={j} className="px-4 py-3">
-                        <div className="skeleton h-4 rounded w-full" />
+                      <td key={j} className="px-4 py-4">
+                        <div className="skeleton h-4 rounded-xl w-full" />
                       </td>
                     ))}
                   </tr>
@@ -738,22 +785,25 @@ function WorkflowTable({ role }: { role: UserRole }) {
                   <tr
                     key={wf.recordId}
                     onClick={() => setLocation(`/workflows/${wf.recordId}`)}
-                    className={`border-b border-border/50 last:border-0 cursor-pointer row-hover ${
-                      idx % 2 === 0 ? "bg-card" : "bg-background/40"
-                    }`}
+                    className={`border-b border-border/40 last:border-0 cursor-pointer transition-colors ${
+                      idx % 2 === 0 ? "bg-card/60" : "bg-background/20"
+                    } hover:bg-primary/5`}
                   >
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-4">
                       <span className="code-inline">{wf.workflowId}</span>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className="text-xs font-medium text-foreground max-w-[160px] truncate block">
+
+                    <td className="px-4 py-4">
+                      <span className="text-xs font-medium text-foreground max-w-[220px] truncate block">
                         {wf.name}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+
+                    <td className="px-4 py-4">
                       <RuntimeBadge runtime={wf.runtime} />
                     </td>
-                    <td className="px-4 py-3">
+
+                    <td className="px-4 py-4">
                       <div className="flex items-center gap-1.5">
                         <StatusBadge status={wf.status} />
                         {(wf.status?.toLowerCase() === "failed" ||
@@ -777,21 +827,25 @@ function WorkflowTable({ role }: { role: UserRole }) {
                           )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+
+                    <td className="px-4 py-4 text-xs text-muted-foreground whitespace-nowrap">
                       {wf.requestedBy}
                     </td>
-                    <td className="px-4 py-3">
+
+                    <td className="px-4 py-4">
                       <span className="text-[11px] font-mono text-muted-foreground">
                         {wf.reportPeriod ?? "—"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                      <span className="flex items-center gap-1">
+
+                    <td className="px-4 py-4 text-xs text-muted-foreground whitespace-nowrap">
+                      <span className="flex items-center gap-1.5">
                         <Clock className="w-3 h-3 shrink-0" />
                         {fmtDate(wf.dateRequested)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs whitespace-nowrap">
+
+                    <td className="px-4 py-4 text-xs whitespace-nowrap">
                       {wf.dateCompleted ? (
                         <span className="flex items-center gap-1 text-emerald-400">
                           <CheckCircle2 className="w-3 h-3" />
@@ -803,13 +857,13 @@ function WorkflowTable({ role }: { role: UserRole }) {
                     </td>
 
                     {canAdminister && (
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6 opacity-50 hover:opacity-100"
+                              className="h-8 w-8 opacity-60 hover:opacity-100 rounded-xl"
                               disabled={updatingId === wf.recordId}
                             >
                               {updatingId === wf.recordId ? (
@@ -819,8 +873,10 @@ function WorkflowTable({ role }: { role: UserRole }) {
                               )}
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuLabel className="text-[11px]">Set Status</DropdownMenuLabel>
+                          <DropdownMenuContent align="end" className="w-44 rounded-xl">
+                            <DropdownMenuLabel className="text-[11px]">
+                              Set Status
+                            </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             {STATUS_OPTIONS.map((s) => (
                               <DropdownMenuItem
@@ -929,47 +985,60 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout breadcrumbs={[{ label: "Dashboard" }]}>
-      <div className="max-w-[1400px] mx-auto space-y-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-semibold text-foreground tracking-tight">
-              Governance Dashboard
-            </h1>
-            <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-              <p className="text-xs text-muted-foreground">
-                Runtime-independent supervision · Weekly Marketing Performance Reporting
-              </p>
-              <RoleBadge role={role} />
-              {relativeTime && (
-                <span className="flex items-center gap-1 text-[11px] text-muted-foreground/60 font-mono">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Synced {relativeTime}
-                </span>
+      <div className="max-w-[1440px] mx-auto space-y-6">
+        <div className="surface-elevated rounded-3xl p-6 md:p-7 overflow-hidden relative">
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.12),transparent_28%),radial-gradient(circle_at_left,rgba(16,185,129,0.06),transparent_20%)]" />
+          <div className="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-[11px] font-medium text-primary">
+                <Sparkles className="w-3 h-3" />
+                Enterprise Agent Governance
+              </div>
+
+              <div>
+                <h1 className="text-heading text-2xl md:text-3xl">
+                  Governance Dashboard
+                </h1>
+                <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
+                  Monitor autonomous workflows across Make and n8n, surface governance
+                  exceptions early, and keep every decision path visible, reviewable, and
+                  audit-ready.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 mt-1 flex-wrap">
+                <RoleBadge role={role} />
+                {relativeTime && (
+                  <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-mono rounded-full bg-muted/20 border border-border/50 px-3 py-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Synced {relativeTime}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refresh}
+                className="h-9 text-xs gap-1.5 bg-transparent rounded-xl"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Refresh
+              </Button>
+
+              {isAnalyst && (
+                <Button
+                  size="sm"
+                  onClick={() => setLocation("/workflows/new")}
+                  className="h-9 text-xs gap-1.5 rounded-xl bg-[var(--primary)] text-white hover:opacity-90"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  New Workflow
+                </Button>
               )}
             </div>
-          </div>
-
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={refresh}
-              className="h-8 text-xs gap-1.5 bg-transparent"
-            >
-              <RefreshCw className="w-3 h-3" />
-              Refresh
-            </Button>
-
-            {isAnalyst && (
-              <Button
-                size="sm"
-                onClick={() => setLocation("/workflows/new")}
-                className="h-8 text-xs gap-1.5"
-              >
-                <Plus className="w-3 h-3" />
-                New Workflow
-              </Button>
-            )}
           </div>
         </div>
 
@@ -977,84 +1046,86 @@ export default function Dashboard() {
 
         {isAdmin && <AdminControlPanel onGoToLogs={() => setLocation("/logs")} />}
 
-        <div className="flex items-center gap-2 flex-wrap pb-1 border-b border-border/40">
-          <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold mr-1">
-            Quick Actions
-          </span>
+        <div className="surface-elevated rounded-2xl p-4 md:p-5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] text-muted-foreground uppercase tracking-[0.16em] font-semibold mr-1">
+              Quick Actions
+            </span>
 
-          {isAnalyst && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50"
-              onClick={() => setLocation("/workflows/new")}
-            >
-              <Plus className="w-3 h-3 text-primary" />
-              New Workflow
-            </Button>
-          )}
-
-          {isAnalyst && (
-            <>
+            {isAnalyst && (
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50"
-                onClick={() => setLocation("/logs")}
+                className="h-8 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50 rounded-xl"
+                onClick={() => setLocation("/workflows/new")}
               >
-                <Activity className="w-3 h-3 text-blue-400" />
-                Execution Logs
+                <Plus className="w-3 h-3 text-primary" />
+                New Workflow
               </Button>
+            )}
 
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50"
-                onClick={() => setLocation("/ai-logs")}
-              >
-                <Bot className="w-3 h-3 text-purple-400" />
-                AI Logs
-              </Button>
-            </>
-          )}
+            {isAnalyst && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50 rounded-xl"
+                  onClick={() => setLocation("/logs")}
+                >
+                  <Activity className="w-3 h-3 text-blue-400" />
+                  Execution Logs
+                </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50"
-            onClick={() => setLocation("/reports")}
-          >
-            <TrendingUp className="w-3 h-3 text-emerald-400" />
-            Reports
-          </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50 rounded-xl"
+                  onClick={() => setLocation("/ai-logs")}
+                >
+                  <Bot className="w-3 h-3 text-purple-400" />
+                  AI Logs
+                </Button>
+              </>
+            )}
 
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50"
-            onClick={() => setLocation("/performance")}
-          >
-            <Sparkles className="w-3 h-3 text-amber-400" />
-            Performance Data
-          </Button>
-
-          {isAdmin && (
             <Button
               variant="outline"
               size="sm"
-              className="h-7 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50"
-              onClick={() => setLocation("/settings")}
+              className="h-8 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50 rounded-xl"
+              onClick={() => setLocation("/reports")}
             >
-              <Users className="w-3 h-3 text-red-400" />
-              Admin Settings
+              <TrendingUp className="w-3 h-3 text-emerald-400" />
+              Reports
             </Button>
-          )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50 rounded-xl"
+              onClick={() => setLocation("/performance")}
+            >
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              Performance Data
+            </Button>
+
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50 rounded-xl"
+                onClick={() => setLocation("/settings")}
+              >
+                <Users className="w-3 h-3 text-red-400" />
+                Admin Settings
+              </Button>
+            )}
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {statsLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="skeleton h-28 rounded-xl" />
+              <div key={i} className="skeleton h-32 rounded-2xl" />
             ))
           ) : (
             <>
@@ -1086,16 +1157,27 @@ export default function Dashboard() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="surface-1 rounded-xl p-5 space-y-4">
-            <p className="text-sm font-semibold">Runtime Distribution</p>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div className="surface-elevated rounded-2xl p-6 card-hover">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Runtime Distribution</p>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Agent activity split by orchestration layer
+                </p>
+              </div>
+              <div className="rounded-2xl bg-primary/10 ring-1 ring-primary/10 p-2">
+                <Zap className="w-4 h-4 text-primary" />
+              </div>
+            </div>
+
             {statsLoading ? (
               <div className="space-y-3">
-                <div className="skeleton h-12 rounded-lg" />
-                <div className="skeleton h-12 rounded-lg" />
+                <div className="skeleton h-12 rounded-2xl" />
+                <div className="skeleton h-12 rounded-2xl" />
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {[
                   {
                     name: "Make",
@@ -1112,18 +1194,19 @@ export default function Dashboard() {
                 ].map((rt) => {
                   const pct = stats?.total ? Math.round((rt.count / stats.total) * 100) : 0;
                   return (
-                    <div key={rt.name} className="space-y-1.5">
+                    <div key={rt.name} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Zap className={`w-3.5 h-3.5 ${rt.icon}`} />
-                          <span className="text-xs font-medium">{rt.name}</span>
+                          <span className="text-xs font-medium text-foreground">{rt.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold text-foreground">{rt.count}</span>
                           <span className="text-[11px] text-muted-foreground">{pct}%</span>
                         </div>
                       </div>
-                      <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
+
+                      <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
                         <div
                           className={`h-full ${rt.color} rounded-full transition-all duration-500`}
                           style={{ width: `${pct}%` }}
@@ -1132,11 +1215,14 @@ export default function Dashboard() {
                     </div>
                   );
                 })}
+
                 {stats && (
-                  <div className="pt-2 border-t border-border/50 flex items-center justify-between">
+                  <div className="pt-3 border-t border-border/50 flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">Success rate</span>
                     <span className="text-sm font-semibold text-emerald-400">
-                      {stats.total > 0 ? `${Math.round((stats.completed / stats.total) * 100)}%` : "—"}
+                      {stats.total > 0
+                        ? `${Math.round((stats.completed / stats.total) * 100)}%`
+                        : "—"}
                     </span>
                   </div>
                 )}
@@ -1151,17 +1237,18 @@ export default function Dashboard() {
         <AnomalyPanel />
 
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-foreground">All Workflows</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Weekly Marketing Performance Reporting · sourced from Airtable
+              <p className="text-xs text-muted-foreground mt-1">
+                Live operational records sourced from Airtable
               </p>
             </div>
+
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground"
+              className="h-8 text-xs gap-1 text-muted-foreground hover:text-foreground rounded-xl"
               onClick={() => setLocation("/reports")}
             >
               View reports
@@ -1173,14 +1260,15 @@ export default function Dashboard() {
         </div>
 
         {isViewer && (
-          <div className="surface-1 rounded-xl p-4 border border-blue-500/15 bg-blue-500/5">
-            <div className="flex items-center gap-2 mb-1">
+          <div className="surface-elevated rounded-2xl p-5 border border-blue-500/15 bg-blue-500/5 card-hover">
+            <div className="flex items-center gap-2 mb-2">
               <Eye className="w-3.5 h-3.5 text-blue-400" />
-              <p className="text-sm font-semibold">Read-only mode</p>
+              <p className="text-sm font-semibold text-foreground">Read-only mode</p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Viewer accounts can inspect governance summaries, reports, performance trends, and workflow outcomes,
-              but cannot create workflows or perform operational actions.
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Viewer accounts can inspect governance summaries, reports, performance
+              trends, and workflow outcomes, but cannot create workflows or perform
+              operational actions.
             </p>
           </div>
         )}
