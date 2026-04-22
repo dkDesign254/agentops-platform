@@ -224,47 +224,36 @@ function AccessPanel({ role }: { role: UserRole }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Plus
-              className={`w-3.5 h-3.5 ${analyst ? "text-emerald-400" : "text-zinc-500"}`}
-            />
-            <p className="text-xs font-semibold text-foreground">Workflow creation</p>
-          </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            {analyst
-              ? "Allowed for analysts and admins."
-              : "Disabled for viewer accounts."}
+        <div
+          onClick={() => setLocation("/workflows/new")}
+          className="rounded-2xl border border-border/60 bg-muted/10 p-4 cursor-pointer hover:bg-primary/10 transition"
+          >
+          <p className="text-xs font-semibold">Workflow creation</p>
+          <p className="text-[11px] text-muted-foreground">
+            Create and configure new automation workflows.
+          </p>
+        </div>
+        
+        <div
+          onClick={() => setLocation("/logs")}
+          className="rounded-2xl border border-border/60 bg-muted/10 p-4 cursor-pointer hover:bg-blue-500/10 transition"
+          >
+          <p className="text-xs font-semibold">Operational logs</p>
+          <p className="text-[11px] text-muted-foreground">
+            View execution logs and AI activity across systems.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Bot
-              className={`w-3.5 h-3.5 ${analyst ? "text-emerald-400" : "text-zinc-500"}`}
-            />
-            <p className="text-xs font-semibold text-foreground">Operational logs</p>
-          </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            {analyst
-              ? "AI logs and execution logs are available."
-              : "Read-only dashboard view only."}
+        <div
+          onClick={() => setLocation("/settings")}
+          className="rounded-2xl border border-border/60 bg-muted/10 p-4 cursor-pointer hover:bg-red-500/10 transition"
+          >
+          <p className="text-xs font-semibold">Administrative controls</p>
+          <p className="text-[11px] text-muted-foreground">
+            Manage users, roles, and governance rules.
           </p>
-        </div>
+    </div>
 
-        <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Shield
-              className={`w-3.5 h-3.5 ${admin ? "text-emerald-400" : "text-zinc-500"}`}
-            />
-            <p className="text-xs font-semibold text-foreground">Administrative controls</p>
-          </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            {admin
-              ? "Status updates and governance actions enabled."
-              : "Reserved for admin users only."}
-          </p>
-        </div>
       </div>
     </div>
   );
