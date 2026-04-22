@@ -37,6 +37,22 @@ export const appRouter = router({
         if (error) throw error;
         return { success: true };
       }),
+  
+  requestPasswordReset: publicProcedure
+  .input(z.object({ email: z.string().email() }))
+  .mutation(async ({ input }) => {
+    const { error } = await supabaseAdmin.auth.admin.generateLink({
+      type: "recovery",
+      email: input.email,
+    });
+
+    if (error) throw error;
+
+    return {
+      success: true,
+      message: "Password reset link generated.",
+    };
+  }),
 
     exchangeSupabaseSession: publicProcedure
       .input(z.object({ accessToken: z.string() }))
@@ -50,7 +66,7 @@ export const appRouter = router({
 
         let role = existingUser?.role;
         if (!existingUser) {
-          role = totalUsers === 0 ? "admin" : "analyst";
+          role = totalUsers === 0 ? "admin" : "viewer";
         } else if (existingUser.role === "user") {
           role = totalUsers === 1 ? "admin" : "analyst";
         }
