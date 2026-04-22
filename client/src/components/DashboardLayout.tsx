@@ -3,6 +3,7 @@ import AuthPanel from "@/components/AuthPanel";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -77,6 +78,12 @@ const NAV_GROUPS = [
       { icon: Terminal, label: "System Logs", path: "/system-logs" },
       { icon: CreditCard, label: "Plan & Billing", path: "/settings" },
     ],
+  },
+  {
+  label: "Support",
+  items: [
+    { icon: Sparkles, label: "AI Help", path: "/help" },
+  ],
   },
 ];
 
@@ -265,7 +272,15 @@ function AppSidebar() {
                 const isActive = item.path === "/" ? location === "/" : location.startsWith(item.path);
                 return (
                   <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton isActive={isActive} onClick={() => setLocation(item.path)} tooltip={item.label} className="h-9 transition-all font-normal text-[13px] rounded-xl px-3">
+                    <SidebarMenuButton
+                      isActive={isActive}
+                      onClick={() => setLocation(item.path)}
+                      className={`h-9 rounded-xl px-3 ${
+                        item.label === "New Workflow"
+                        ? "bg-primary text-white hover:opacity-90"
+                        : ""
+                      }`}
+                      >
                       <item.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
                       <span className={isActive ? "text-foreground font-medium" : "text-muted-foreground"}>{item.label}</span>
                     </SidebarMenuButton>
