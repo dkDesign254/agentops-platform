@@ -207,10 +207,17 @@ function StatCard({
   );
 }
 
-function AccessPanel({ role }: { role: UserRole }) {
-  const admin = role === "admin";
-  const analyst = role === "analyst" || role === "admin";
-
+function AccessPanel({
+  role,
+  onGoToNewWorkflow,
+  onGoToLogs,
+  onGoToSettings,
+}: {
+  role: UserRole;
+  onGoToNewWorkflow: () => void;
+  onGoToLogs: () => void;
+  onGoToSettings: () => void;
+}) {
   return (
     <div className="surface-elevated rounded-2xl p-6 card-hover">
       <div className="flex items-center justify-between gap-3 mb-5">
@@ -225,19 +232,19 @@ function AccessPanel({ role }: { role: UserRole }) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div
-          onClick={() => setLocation("/workflows/new")}
+          onClick={onGoToNewWorkflow}
           className="rounded-2xl border border-border/60 bg-muted/10 p-4 cursor-pointer hover:bg-primary/10 transition"
-          >
+        >
           <p className="text-xs font-semibold">Workflow creation</p>
           <p className="text-[11px] text-muted-foreground">
             Create and configure new automation workflows.
           </p>
         </div>
-        
+
         <div
-          onClick={() => setLocation("/logs")}
+          onClick={onGoToLogs}
           className="rounded-2xl border border-border/60 bg-muted/10 p-4 cursor-pointer hover:bg-blue-500/10 transition"
-          >
+        >
           <p className="text-xs font-semibold">Operational logs</p>
           <p className="text-[11px] text-muted-foreground">
             View execution logs and AI activity across systems.
@@ -245,21 +252,28 @@ function AccessPanel({ role }: { role: UserRole }) {
         </div>
 
         <div
-          onClick={() => setLocation("/settings")}
+          onClick={onGoToSettings}
           className="rounded-2xl border border-border/60 bg-muted/10 p-4 cursor-pointer hover:bg-red-500/10 transition"
-          >
+        >
           <p className="text-xs font-semibold">Administrative controls</p>
           <p className="text-[11px] text-muted-foreground">
             Manage users, roles, and governance rules.
           </p>
-    </div>
-
+        </div>
       </div>
     </div>
   );
 }
 
-function AdminControlPanel({ onGoToLogs }: { onGoToLogs: () => void }) {
+function AdminControlPanel({
+  onGoToLogs,
+  onGoToSettings,
+  onGoToSystemLogs,
+}: {
+  onGoToLogs: () => void;
+  onGoToSettings: () => void;
+  onGoToSystemLogs: () => void;
+}) {
   return (
     <div className="surface-elevated rounded-2xl p-6 border border-red-500/20 card-hover">
       <div className="flex items-center gap-2 mb-4">
@@ -267,7 +281,9 @@ function AdminControlPanel({ onGoToLogs }: { onGoToLogs: () => void }) {
           <Shield className="w-4 h-4 text-red-400" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-foreground">Admin Governance Controls</p>
+          <p className="text-sm font-semibold text-foreground">
+            Admin Governance Controls
+          </p>
           <p className="text-[11px] text-muted-foreground">
             Elevated actions and oversight tools
           </p>
@@ -276,32 +292,40 @@ function AdminControlPanel({ onGoToLogs }: { onGoToLogs: () => void }) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div
-          onClick={() => setLocation("/logs")}
+          onClick={onGoToLogs}
           className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4 cursor-pointer hover:bg-red-500/10 transition"
-          >
-          <p className="text-xs font-semibold text-foreground mb-1">Status control</p>
+        >
+          <p className="text-xs font-semibold text-foreground mb-1">
+            Status control
+          </p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Review workflow states, failures, and execution behaviour in the logs view.
+            Review workflow states, failures, and execution behaviour in the logs
+            view.
           </p>
         </div>
 
         <div
-          onClick={() => setLocation("/settings")}
+          onClick={onGoToSettings}
           className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4 cursor-pointer hover:bg-red-500/10 transition"
-          >
-          <p className="text-xs font-semibold text-foreground mb-1">User governance</p>
+        >
+          <p className="text-xs font-semibold text-foreground mb-1">
+            User governance
+          </p>
           <p className="text-xs text-muted-foreground leading-relaxed">
             Manage access, roles, and administrative controls from settings.
           </p>
         </div>
 
         <div
-          onClick={() => setLocation("/system-logs")}
+          onClick={onGoToSystemLogs}
           className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4 cursor-pointer hover:bg-red-500/10 transition"
-          >
-          <p className="text-xs font-semibold text-foreground mb-1">Deep diagnostics</p>
+        >
+          <p className="text-xs font-semibold text-foreground mb-1">
+            Deep diagnostics
+          </p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Inspect system-level events, infrastructure issues, and platform diagnostics.
+            Inspect system-level events, infrastructure issues, and platform
+            diagnostics.
           </p>
         </div>
       </div>
@@ -343,7 +367,9 @@ function InsightsPanel() {
           <Sparkles className="w-4 h-4 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground">AI Governance Insights</p>
+          <p className="text-sm font-semibold text-foreground">
+            AI Governance Insights
+          </p>
           <p className="text-[11px] text-muted-foreground">
             AI-generated · refreshes every 2 minutes
           </p>
@@ -493,7 +519,9 @@ function HealthBar({
   if (!stats || stats.total === 0) {
     return (
       <div className="surface-elevated rounded-2xl p-6">
-        <p className="text-sm font-semibold text-foreground mb-3">Workflow Health</p>
+        <p className="text-sm font-semibold text-foreground mb-3">
+          Workflow Health
+        </p>
         <div className="skeleton h-2 rounded-full" />
       </div>
     );
@@ -547,7 +575,9 @@ function HealthBar({
             <div key={x.label} className="flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${x.color}`} />
               <span className="text-xs text-muted-foreground">{x.label}</span>
-              <span className="text-xs font-semibold text-foreground">{x.count}</span>
+              <span className="text-xs font-semibold text-foreground">
+                {x.count}
+              </span>
             </div>
           ))}
       </div>
@@ -707,7 +737,9 @@ function WorkflowTable({ role }: { role: UserRole }) {
               onClick={() => refetch()}
               disabled={isFetching}
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`}
+              />
             </Button>
           </div>
 
@@ -761,7 +793,10 @@ function WorkflowTable({ role }: { role: UserRole }) {
                 ))
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={canAdminister ? 9 : 8} className="px-4 py-16 text-center">
+                  <td
+                    colSpan={canAdminister ? 9 : 8}
+                    className="px-4 py-16 text-center"
+                  >
                     <div className="flex flex-col items-center gap-3 text-muted-foreground">
                       <Activity className="w-8 h-8 opacity-30" />
                       <p className="text-sm font-medium">No workflows found</p>
@@ -850,7 +885,10 @@ function WorkflowTable({ role }: { role: UserRole }) {
                     </td>
 
                     {canAdminister && (
-                      <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                      <td
+                        className="px-4 py-4"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -866,7 +904,10 @@ function WorkflowTable({ role }: { role: UserRole }) {
                               )}
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-44 rounded-xl">
+                          <DropdownMenuContent
+                            align="end"
+                            className="w-44 rounded-xl"
+                          >
                             <DropdownMenuLabel className="text-[11px]">
                               Set Status
                             </DropdownMenuLabel>
@@ -880,7 +921,10 @@ function WorkflowTable({ role }: { role: UserRole }) {
                                     : ""
                                 }`}
                                 onClick={() =>
-                                  updateStatus.mutate({ recordId: wf.recordId, status: s })
+                                  updateStatus.mutate({
+                                    recordId: wf.recordId,
+                                    status: s,
+                                  })
                                 }
                               >
                                 <span
@@ -993,9 +1037,9 @@ export default function Dashboard() {
                   Governance Dashboard
                 </h1>
                 <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-                  Monitor autonomous workflows across Make and n8n, surface governance
-                  exceptions early, and keep every decision path visible, reviewable, and
-                  audit-ready.
+                  Monitor autonomous workflows across Make and n8n, surface
+                  governance exceptions early, and keep every decision path visible,
+                  reviewable, and audit-ready.
                 </p>
               </div>
 
@@ -1035,9 +1079,80 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <AccessPanel role={role} />
+        {user && (
+          <div className="surface-elevated rounded-2xl p-5 border border-blue-500/15 bg-blue-500/5 card-hover">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-2xl bg-blue-500/10 border border-blue-500/20 shrink-0">
+                <Sparkles className="w-4 h-4 text-blue-400" />
+              </div>
 
-        {isAdmin && <AdminControlPanel onGoToLogs={() => setLocation("/logs")} />}
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">Quick Start</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  This workspace helps you monitor AI agents, workflows, logs,
+                  reports, and runtime health without needing to understand every
+                  technical detail first.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+                  <button
+                    onClick={() => setLocation("/")}
+                    className="rounded-2xl border border-border/70 bg-background/30 p-4 text-left hover:bg-accent/20 transition"
+                  >
+                    <p className="text-xs font-semibold text-foreground mb-1">
+                      1. Review workflows
+                    </p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Start from the dashboard to see what exists, what is active,
+                      and what needs attention.
+                    </p>
+                  </button>
+
+                  <button
+                    onClick={() => setLocation("/logs")}
+                    className="rounded-2xl border border-border/70 bg-background/30 p-4 text-left hover:bg-accent/20 transition"
+                  >
+                    <p className="text-xs font-semibold text-foreground mb-1">
+                      2. Check logs
+                    </p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Use execution and AI logs to understand what happened and
+                      where action is needed.
+                    </p>
+                  </button>
+
+                  <button
+                    onClick={() => setLocation("/workflows/new")}
+                    className="rounded-2xl border border-primary/30 bg-primary/10 p-4 text-left hover:bg-primary/15 transition"
+                  >
+                    <p className="text-xs font-semibold text-foreground mb-1">
+                      3. Create your first workflow
+                    </p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Launch a new agent workflow when you are ready to test or
+                      automate a process.
+                    </p>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <AccessPanel
+          role={role}
+          onGoToNewWorkflow={() => setLocation("/workflows/new")}
+          onGoToLogs={() => setLocation("/logs")}
+          onGoToSettings={() => setLocation("/settings")}
+        />
+
+        {isAdmin && (
+          <AdminControlPanel
+            onGoToLogs={() => setLocation("/logs")}
+            onGoToSettings={() => setLocation("/settings")}
+            onGoToSystemLogs={() => setLocation("/system-logs")}
+          />
+        )}
 
         <div className="surface-elevated rounded-2xl p-4 md:p-5">
           <div className="flex items-center gap-2 flex-wrap">
@@ -1154,7 +1269,9 @@ export default function Dashboard() {
           <div className="surface-elevated rounded-2xl p-6 card-hover">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-sm font-semibold text-foreground">Runtime Distribution</p>
+                <p className="text-sm font-semibold text-foreground">
+                  Runtime Distribution
+                </p>
                 <p className="text-[11px] text-muted-foreground mt-1">
                   Agent activity split by orchestration layer
                 </p>
@@ -1185,17 +1302,25 @@ export default function Dashboard() {
                     icon: "text-orange-400",
                   },
                 ].map((rt) => {
-                  const pct = stats?.total ? Math.round((rt.count / stats.total) * 100) : 0;
+                  const pct = stats?.total
+                    ? Math.round((rt.count / stats.total) * 100)
+                    : 0;
                   return (
                     <div key={rt.name} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Zap className={`w-3.5 h-3.5 ${rt.icon}`} />
-                          <span className="text-xs font-medium text-foreground">{rt.name}</span>
+                          <span className="text-xs font-medium text-foreground">
+                            {rt.name}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold text-foreground">{rt.count}</span>
-                          <span className="text-[11px] text-muted-foreground">{pct}%</span>
+                          <span className="text-xs font-semibold text-foreground">
+                            {rt.count}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground">
+                            {pct}%
+                          </span>
                         </div>
                       </div>
 
@@ -1211,7 +1336,9 @@ export default function Dashboard() {
 
                 {stats && (
                   <div className="pt-3 border-t border-border/50 flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Success rate</span>
+                    <span className="text-xs text-muted-foreground">
+                      Success rate
+                    </span>
                     <span className="text-sm font-semibold text-emerald-400">
                       {stats.total > 0
                         ? `${Math.round((stats.completed / stats.total) * 100)}%`
@@ -1232,7 +1359,9 @@ export default function Dashboard() {
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold text-foreground">All Workflows</h2>
+              <h2 className="text-sm font-semibold text-foreground">
+                All Workflows
+              </h2>
               <p className="text-xs text-muted-foreground mt-1">
                 Live operational records sourced from Airtable
               </p>
@@ -1256,12 +1385,14 @@ export default function Dashboard() {
           <div className="surface-elevated rounded-2xl p-5 border border-blue-500/15 bg-blue-500/5 card-hover">
             <div className="flex items-center gap-2 mb-2">
               <Eye className="w-3.5 h-3.5 text-blue-400" />
-              <p className="text-sm font-semibold text-foreground">Read-only mode</p>
+              <p className="text-sm font-semibold text-foreground">
+                Read-only mode
+              </p>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Viewer accounts can inspect governance summaries, reports, performance
-              trends, and workflow outcomes, but cannot create workflows or perform
-              operational actions.
+              Viewer accounts can inspect governance summaries, reports,
+              performance trends, and workflow outcomes, but cannot create
+              workflows or perform operational actions.
             </p>
           </div>
         )}
