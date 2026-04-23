@@ -216,25 +216,103 @@ body {
 }
 
 /* ===== INTERACTIONS ===== */
+/*CARD INTERACTIVITY*/
 
 .card-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease,
-    background-color 0.2s ease;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid hsl(var(--border));
 }
 
 .card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+  transform: translateY(-3px);
+  border-color: hsl(var(--primary) / 0.4);
+  background: hsl(var(--accent) / 0.3);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
 }
 
 .dark .card-hover:hover {
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.44);
+  background: hsl(var(--accent) / 0.5);
 }
 
-.glow-primary {
+/*ACTION HIGHLIGHT*/
+
+.action-highlight {
+  border: 1px solid hsl(var(--primary) / 0.3);
+  background: hsl(var(--primary) / 0.08);
+}
+
+.action-highlight:hover {
+  background: hsl(var(--primary) / 0.14);
+}
+
+/*TEXT VISIBILITY*/
+
+.text-strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.text-soft {
+  color: var(--text-secondary);
+}
+
+.text-faint {
+  color: var(--text-muted);
+}
+
+/*SECTION SEPARATION*/
+
+.section-card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 20px;
+  padding: 1.25rem;
+}
+
+.section-card-strong {
+  background: var(--surface-elevated);
+  border: 1px solid hsl(var(--primary) / 0.2);
+}
+
+/*PRIMARY CTA GLOW*/
+
+.cta-glow {
   box-shadow:
-    0 0 0 1px rgba(99, 102, 241, 0.16),
-    0 0 24px rgba(99, 102, 241, 0.08);
+    0 0 0 1px rgba(99, 102, 241, 0.2),
+    0 0 20px rgba(99, 102, 241, 0.2);
+}
+
+/*INPUT / FORM VISIBILITY*/
+
+.input-modern {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  padding: 0.55rem 0.75rem;
+}
+
+.input-modern:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
+}
+
+/*SIDEBAR FEEL (KEY)*/
+
+.sidebar-item {
+  border-radius: 12px;
+  padding: 0.5rem 0.6rem;
+  transition: all 0.2s ease;
+}
+
+.sidebar-item:hover {
+  background: hsl(var(--accent));
+}
+
+.sidebar-active {
+  background: hsl(var(--primary) / 0.12);
+  border: 1px solid hsl(var(--primary) / 0.25);
 }
 
 /* ===== CODE / META ===== */
