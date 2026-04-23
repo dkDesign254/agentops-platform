@@ -5,11 +5,13 @@ import {
   Activity,
   ArrowRight,
   Bot,
+  Brain,
   CheckCircle2,
   ExternalLink,
   FileText,
   HelpCircle,
   Loader2,
+  MessageSquareText,
   Settings,
   Shield,
   Sparkles,
@@ -19,6 +21,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
+import { toast } from "sonner";
 
 type ExplainContext = "overview" | "errors" | "performance";
 
@@ -84,8 +87,10 @@ function SuggestionChip({
 
 export default function HelpPage() {
   const [, setLocation] = useLocation();
+
   const [selectedWorkflowId, setSelectedWorkflowId] = useState("");
   const [context, setContext] = useState<ExplainContext>("overview");
+  const [assistantPrompt, setAssistantPrompt] = useState("");
 
   const { data: workflows = [], isLoading: workflowsLoading } =
     trpc.airtable.workflows.useQuery();
@@ -109,6 +114,83 @@ export default function HelpPage() {
     });
   };
 
+  const runAssistantShortcut = (text: string) => {
+    setAssistantPrompt(text);
+    toast.success("Suggestion loaded into the assistant input.");
+  };
+
+  const handleAssistantAction = () => {
+    const text = assistantPrompt.trim().toLowerCase();
+
+    if (!text) {
+      toast.error("Type a request first.");
+      return;
+    }
+
+    if (
+      text.includes("create") ||
+      text.includes("new workflow") ||
+      text.includes("build workflow") ||
+      text.includes("automation")
+    ) {
+      setLocation("/workflows/new");
+      return;
+    }
+
+    if (
+      text.includes("log") ||
+      text.includes("error") ||
+      text.includes("failure") ||
+      text.includes("execution")
+    ) {
+      setLocation("/logs");
+      return;
+    }
+
+    if (
+      text.includes("ai") ||
+      text.includes("prompt") ||
+      text.includes("response") ||
+      text.includes("model")
+    ) {
+      setLocation("/ai-logs");
+      return;
+    }
+
+    if (
+      text.includes("performance") ||
+      text.includes("campaign") ||
+      text.includes("conversion") ||
+      text.includes("spend")
+    ) {
+      setLocation("/performance");
+      return;
+    }
+
+    if (
+      text.includes("report") ||
+      text.includes("summary") ||
+      text.includes("insight")
+    ) {
+      setLocation("/reports");
+      return;
+    }
+
+    if (
+      text.includes("setting") ||
+      text.includes("billing") ||
+      text.includes("admin") ||
+      text.includes("role")
+    ) {
+      setLocation("/settings");
+      return;
+    }
+
+    toast.info(
+      "I understood the request, but it is not mapped to an automatic page jump yet."
+    );
+  };
+
   return (
     <DashboardLayout
       breadcrumbs={[{ label: "Dashboard", path: "/" }, { label: "AI Help" }]}
@@ -129,6 +211,67 @@ export default function HelpPage() {
                 helps you understand workflows without forcing you to learn the whole
                 system at once. Think of it as your in-app operator guide.
               </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="surface-elevated rounded-2xl p-6 border border-primary/15 glow-primary">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-2 rounded-2xl bg-primary/10 border border-primary/20">
+              <Brain className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Omni-style assistant
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Tell the app what you want to do, and it will route you to the most relevant workspace.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border/70 bg-background/40 p-4">
+            <label className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground font-semibold mb-2 block">
+              Ask for help
+            </label>
+
+            <div className="flex flex-col md:flex-row gap-3">
+              <input
+                value={assistantPrompt}
+                onChange={(e) => setAssistantPrompt(e.target.value)}
+                placeholder="Example: show me failed workflows, help me create a new workflow, explain AI logs"
+                className="flex-1 h-11 rounded-xl border border-border bg-background/50 px-3 text-sm text-foreground outline-none"
+              />
+              <Button
+                onClick={handleAssistantAction}
+                className="h-11 rounded-xl bg-[var(--primary)] text-white hover:opacity-90"
+              >
+                <MessageSquareText className="w-4 h-4 mr-2" />
+                Assist me
+              </Button>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mt-4">
+              <SuggestionChip
+                label="Help me create a workflow"
+                onClick={() => runAssistantShortcut("Help me create a workflow")}
+              />
+              <SuggestionChip
+                label="Show me failed workflows"
+                onClick={() => runAssistantShortcut("Show me failed workflows")}
+              />
+              <SuggestionChip
+                label="Explain AI logs"
+                onClick={() => runAssistantShortcut("Explain AI logs")}
+              />
+              <SuggestionChip
+                label="Take me to reports"
+                onClick={() => runAssistantShortcut("Take me to reports")}
+              />
+              <SuggestionChip
+                label="Show performance data"
+                onClick={() => runAssistantShortcut("Show performance data")}
+              />
             </div>
           </div>
         </div>
