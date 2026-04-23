@@ -35,8 +35,12 @@ import { trpc } from "@/lib/trpc";
 import {
   Activity,
   BarChart3,
+  Bot,
+  ChevronRight,
   CreditCard,
   FileText,
+  HelpCircle,
+  Home,
   LayoutDashboard,
   LogOut,
   Moon,
@@ -44,15 +48,13 @@ import {
   Plus,
   Settings,
   Shield,
+  Sparkles,
   Sun,
   Terminal,
   TrendingUp,
   Webhook,
+  Workflow,
   Zap,
-  ChevronRight,
-  Sparkles,
-  ArrowUpRight,
-  Bot,
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -60,19 +62,26 @@ import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 
 const NAV_GROUPS = [
   {
-    label: "Governance",
+    label: "Home",
     items: [
+      { icon: Home, label: "Homepage", path: "/home" },
       { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-      { icon: Plus, label: "New Workflow", path: "/workflows/new" },
-      { icon: Activity, label: "Execution Logs", path: "/logs" },
     ],
   },
   {
-    label: "Intelligence",
+    label: "Workflows",
     items: [
-      { icon: TrendingUp, label: "Performance Data", path: "/performance" },
+      { icon: Plus, label: "New Workflow", path: "/workflows/new" },
+      { icon: Activity, label: "Execution Logs", path: "/logs" },
+      { icon: Bot, label: "AI Logs", path: "/ai-logs" },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [
       { icon: FileText, label: "Reports", path: "/reports" },
-      { icon: BarChart3, label: "AI Logs", path: "/ai-logs" },
+      { icon: TrendingUp, label: "Performance Data", path: "/performance" },
+      { icon: Sparkles, label: "AI Help", path: "/help" },
     ],
   },
   {
@@ -82,10 +91,6 @@ const NAV_GROUPS = [
       { icon: Terminal, label: "System Logs", path: "/system-logs" },
       { icon: CreditCard, label: "Plan & Billing", path: "/settings" },
     ],
-  },
-  {
-    label: "Support",
-    items: [{ icon: Sparkles, label: "AI Help", path: "/help" }],
   },
 ];
 
@@ -106,6 +111,7 @@ function useSystemStatus() {
         setLastSync(new Date());
       }, 1200);
     }, 45000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -148,7 +154,13 @@ function Topbar({
 
         {breadcrumbs && breadcrumbs.length > 0 && (
           <nav className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
-            <span className="text-muted-foreground/50 font-medium">AgentOps</span>
+            <button
+              onClick={() => setLocation("/home")}
+              className="text-muted-foreground/70 hover:text-foreground transition-colors font-medium"
+            >
+              AgentOps
+            </button>
+
             {breadcrumbs.map((crumb, i) => (
               <span key={i} className="flex items-center gap-1.5 min-w-0">
                 <ChevronRight className="w-3 h-3 shrink-0 text-muted-foreground/40" />
@@ -181,7 +193,7 @@ function Topbar({
             </div>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs">
-            <p className="font-medium">Airtable connection</p>
+            <p className="font-medium">Workspace sync status</p>
             <p className="text-muted-foreground mt-0.5">
               Last synced {formatLastSync(lastSync)}
             </p>
@@ -217,6 +229,7 @@ function Topbar({
                   {user?.name?.charAt(0).toUpperCase() ?? "U"}
                 </AvatarFallback>
               </Avatar>
+
               <span className="text-xs font-medium text-foreground hidden sm:block max-w-[120px] truncate">
                 {user?.name ?? "User"}
               </span>
@@ -244,6 +257,22 @@ function Topbar({
             </DropdownMenuLabel>
 
             <DropdownMenuSeparator />
+
+            <DropdownMenuItem
+              onClick={() => setLocation("/home")}
+              className="cursor-pointer text-xs"
+            >
+              <Home className="mr-2 h-3.5 w-3.5" />
+              Homepage
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => setLocation("/help")}
+              className="cursor-pointer text-xs"
+            >
+              <HelpCircle className="mr-2 h-3.5 w-3.5" />
+              AI Help
+            </DropdownMenuItem>
 
             <DropdownMenuItem
               onClick={() => setLocation("/settings")}
@@ -286,21 +315,30 @@ function AppSidebar() {
   });
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar/90 backdrop-blur-xl">
+    <Sidebar
+      collapsible="icon"
+      className="border-r border-sidebar-border bg-sidebar/90 backdrop-blur-xl"
+    >
       <SidebarHeader className="border-b border-sidebar-border/70 px-3 py-3">
-        <div className="flex items-center gap-2.5 h-full">
+        <button
+          onClick={() => setLocation("/home")}
+          className="flex items-center gap-2.5 h-full text-left w-full"
+        >
           <div className="w-8 h-8 rounded-2xl bg-primary/15 ring-1 ring-primary/20 flex items-center justify-center shrink-0 shadow-sm">
             <Shield className="w-4 h-4 text-primary" />
           </div>
+
           {!isCollapsed && (
             <div className="min-w-0">
-              <p className="text-sm font-semibold tracking-tight truncate">AgentOps</p>
+              <p className="text-sm font-semibold tracking-tight truncate">
+                AgentOps
+              </p>
               <p className="text-[10px] text-muted-foreground truncate">
                 Enterprise agent governance
               </p>
             </div>
           )}
-        </div>
+        </button>
       </SidebarHeader>
 
       <SidebarContent className="gap-0 pt-3 pb-3">
@@ -336,13 +374,15 @@ function AppSidebar() {
                     ? location === "/"
                     : location.startsWith(item.path);
 
+                const isPrimaryAction = item.label === "New Workflow";
+
                 return (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
                       isActive={isActive}
                       onClick={() => setLocation(item.path)}
                       className={`h-9 rounded-xl px-3 ${
-                        item.label === "New Workflow"
+                        isPrimaryAction
                           ? "bg-primary text-white hover:opacity-90"
                           : ""
                       }`}
@@ -350,17 +390,17 @@ function AppSidebar() {
                       <item.icon
                         className={`h-4 w-4 shrink-0 ${
                           isActive
-                            ? item.label === "New Workflow"
+                            ? isPrimaryAction
                               ? "text-white"
                               : "text-primary"
-                            : item.label === "New Workflow"
+                            : isPrimaryAction
                             ? "text-white"
                             : "text-muted-foreground"
                         }`}
                       />
                       <span
                         className={
-                          item.label === "New Workflow"
+                          isPrimaryAction
                             ? "text-white font-medium"
                             : isActive
                             ? "text-foreground font-medium"
@@ -411,31 +451,29 @@ function AppSidebar() {
       <SidebarFooter className="p-3 border-t border-sidebar-border/70">
         {!isCollapsed ? (
           <button
-            onClick={() => setLocation("/settings")}
+            onClick={() => setLocation("/help")}
             className="w-full rounded-2xl border border-border/70 bg-gradient-to-br from-background to-muted/30 px-4 py-3 text-left hover:border-primary/30 hover:bg-accent/40 transition-colors shadow-sm"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold text-foreground">
-                  Premium Workspace
-                </p>
+                <p className="text-xs font-semibold text-foreground">Need help?</p>
                 <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
-                  Billing, limits, governance controls, and deployment settings.
+                  Use AI Help to understand the app, workflows, and where to go next.
                 </p>
               </div>
-              <ArrowUpRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+              <HelpCircle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
             </div>
           </button>
         ) : (
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
-                tooltip="Plan & Billing"
-                onClick={() => setLocation("/settings")}
+                tooltip="AI Help"
+                onClick={() => setLocation("/help")}
                 className="h-9 rounded-xl"
               >
-                <CreditCard className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Plan & Billing</span>
+                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">AI Help</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -462,6 +500,7 @@ export default function DashboardLayout({
       return DEFAULT_WIDTH;
     }
   });
+
   const { loading, user } = useAuth();
 
   useEffect(() => {
@@ -500,30 +539,40 @@ function LayoutContent({
   const isMobile = useIsMobile();
   const [location, setLocation] = useLocation();
 
+  useEffect(() => {
+    if (!["/signin", "/home"].includes(location)) {
+      sessionStorage.setItem("agentops:last-path", location);
+    }
+  }, [location]);
+
   const autoBreadcrumbs =
     breadcrumbs ??
     (() => {
       const map: Record<string, string> = {
+        "/home": "Homepage",
         "/": "Dashboard",
         "/workflows/new": "New Workflow",
         "/reports": "Reports",
-        "/performance": "Performance Data",
         "/webhooks": "Webhook Simulator",
-        "/system-logs": "System Logs",
+        "/performance": "Performance Data",
         "/settings": "Plan & Billing",
+        "/system-logs": "System Logs",
         "/logs": "Execution Logs",
         "/ai-logs": "AI Logs",
         "/help": "AI Help",
       };
+
       const label = map[location];
       if (!label) {
-        if (location.startsWith("/workflows/"))
+        if (location.startsWith("/workflows/")) {
           return [
-            { label: "Workflows", path: "/" },
-            { label: "Detail" },
+            { label: "Dashboard", path: "/" },
+            { label: "Workflow Detail" },
           ];
+        }
         return [];
       }
+
       return [{ label }];
     })();
 
@@ -536,8 +585,10 @@ function LayoutContent({
       if (!isResizing) return;
       const left = sidebarRef.current?.getBoundingClientRect().left ?? 0;
       const newWidth = e.clientX - left;
-      if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH)
+
+      if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
         setSidebarWidth(newWidth);
+      }
     };
 
     const handleMouseUp = () => setIsResizing(false);
@@ -575,14 +626,19 @@ function LayoutContent({
           <div className="flex border-b border-border/60 h-12 items-center justify-between bg-background/90 px-3 backdrop-blur sticky top-0 z-40">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="h-7 w-7 rounded-md" />
-              <span className="text-sm font-medium">AgentOps</span>
+              <button
+                onClick={() => setLocation("/home")}
+                className="text-sm font-medium"
+              >
+                AgentOps
+              </button>
             </div>
           </div>
         )}
 
         {!isMobile && <Topbar breadcrumbs={autoBreadcrumbs} />}
 
-        <main className="flex-1 px-6 py-6 animate-in-fade">{children}</main>
+        <main className="flex-1 px-6 py-6 animate-in">{children}</main>
 
         <button
           onClick={() => setLocation("/help")}
@@ -590,7 +646,7 @@ function LayoutContent({
           aria-label="Open AI Help"
           title="AI Help"
         >
-          <Bot className="w-4 h-4" />
+          <Sparkles className="w-4 h-4" />
           <span className="text-xs font-medium hidden sm:inline">AI Help</span>
         </button>
       </SidebarInset>
