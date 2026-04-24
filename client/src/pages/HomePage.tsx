@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import {
+  Activity,
   ArrowRight,
   BarChart3,
   Bot,
