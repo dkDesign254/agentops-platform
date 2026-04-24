@@ -24,17 +24,12 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useIsMobile } from "@/hooks/useMobile";
 import { trpc } from "@/lib/trpc";
 import {
   Activity,
-  BarChart3,
   Bot,
   ChevronRight,
   CreditCard,
@@ -53,7 +48,6 @@ import {
   Terminal,
   TrendingUp,
   Webhook,
-  Workflow,
   Zap,
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
@@ -95,10 +89,10 @@ const NAV_GROUPS = [
 ];
 
 const SIDEBAR_WIDTH_KEY = "agentops-sidebar-width";
+const SIDEBAR_OPEN_KEY = "agentops-sidebar-open";
 const DEFAULT_WIDTH = 248;
 const MIN_WIDTH = 220;
 const MAX_WIDTH = 360;
-const SIDEBAR_OPEN_KEY = "agentops-sidebar-open";
 
 function useSystemStatus() {
   const [status, setStatus] = useState<"live" | "syncing" | "error">("live");
@@ -119,11 +113,7 @@ function useSystemStatus() {
   return { status, lastSync };
 }
 
-function Topbar({
-  breadcrumbs,
-}: {
-  breadcrumbs?: { label: string; path?: string }[];
-}) {
+function Topbar({ breadcrumbs }: { breadcrumbs?: { label: string; path?: string }[] }) {
   const { theme, toggleTheme } = useTheme();
   const { status, lastSync } = useSystemStatus();
   const { user, logout } = useAuth();
@@ -173,9 +163,7 @@ function Topbar({
                     {crumb.label}
                   </button>
                 ) : (
-                  <span className="text-foreground font-medium truncate">
-                    {crumb.label}
-                  </span>
+                  <span className="text-foreground font-medium truncate">{crumb.label}</span>
                 )}
               </span>
             ))}
@@ -188,16 +176,12 @@ function Topbar({
           <TooltipTrigger asChild>
             <div className="flex items-center gap-1.5 rounded-full border border-border/60 bg-background/70 px-3 py-1.5 cursor-default select-none shadow-sm">
               <span className={`w-2 h-2 rounded-full ${statusConfig.dot}`} />
-              <span className={`text-xs font-medium ${statusConfig.color}`}>
-                {statusConfig.label}
-              </span>
+              <span className={`text-xs font-medium ${statusConfig.color}`}>{statusConfig.label}</span>
             </div>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs">
             <p className="font-medium">Workspace sync status</p>
-            <p className="text-muted-foreground mt-0.5">
-              Last synced {formatLastSync(lastSync)}
-            </p>
+            <p className="text-muted-foreground mt-0.5">Last synced {formatLastSync(lastSync)}</p>
           </TooltipContent>
         </Tooltip>
 
@@ -241,78 +225,49 @@ function Topbar({
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col gap-0.5">
                 <p className="text-sm font-medium">{user?.name ?? "User"}</p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {user?.email ?? ""}
-                </p>
-                <Badge
-                  variant="secondary"
-                  className="w-fit mt-1 text-[10px] px-1.5 py-0 rounded-full"
-                >
-                  {user?.role === "admin"
-                    ? "Admin"
-                    : user?.role === "analyst"
-                    ? "Analyst"
-                    : "Viewer"}
+                <p className="text-xs text-muted-foreground truncate">{user?.email ?? ""}</p>
+                <Badge variant="secondary" className="w-fit mt-1 text-[10px] px-1.5 py-0 rounded-full">
+                  {user?.role === "admin" ? "Admin" : user?.role === "analyst" ? "Analyst" : "Viewer"}
                 </Badge>
               </div>
             </DropdownMenuLabel>
 
             <DropdownMenuSeparator />
-            
-            <DropdownMenuItem
-              onClick={() => setLocation("/home")}
-              className="cursor-pointer text-xs"
-              >
+
+            <DropdownMenuItem onClick={() => setLocation("/home")} className="cursor-pointer text-xs">
               <Home className="mr-2 h-3.5 w-3.5" />
               Homepage
             </DropdownMenuItem>
-            
-            <DropdownMenuItem
-              onClick={() => setLocation("/help")}
-              className="cursor-pointer text-xs"
-              >
-              
+
+            <DropdownMenuItem onClick={() => setLocation("/help")} className="cursor-pointer text-xs">
               <Sparkles className="mr-2 h-3.5 w-3.5" />
               AI Help
             </DropdownMenuItem>
-            
-            <DropdownMenuItem
-              onClick={() => setLocation("/settings")}
-              className="cursor-pointer text-xs"
-              >
-              
+
+            <DropdownMenuItem onClick={() => setLocation("/settings")} className="cursor-pointer text-xs">
               <Settings className="mr-2 h-3.5 w-3.5" />
               Workspace Settings
             </DropdownMenuItem>
-            
-            <DropdownMenuItem
-              onClick={() => setLocation("/settings")}
-              className="cursor-pointer text-xs"
-              >
-              
+
+            <DropdownMenuItem onClick={() => setLocation("/settings")} className="cursor-pointer text-xs">
               <CreditCard className="mr-2 h-3.5 w-3.5" />
               Plan & Billing
             </DropdownMenuItem>
-            
-            <DropdownMenuItem
-              onClick={() => setLocation("/system-logs")}
-              className="cursor-pointer text-xs"
-              >
-              
+
+            <DropdownMenuItem onClick={() => setLocation("/system-logs")} className="cursor-pointer text-xs">
               <Terminal className="mr-2 h-3.5 w-3.5" />
               System Health
             </DropdownMenuItem>
-            
+
             <DropdownMenuSeparator />
-            
+
             <DropdownMenuItem
               onClick={logout}
               className="cursor-pointer text-xs text-destructive focus:text-destructive"
-              >
-              
+            >
               <LogOut className="mr-2 h-3.5 w-3.5" />
               Sign out
-            0</DropdownMenuItem>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -328,58 +283,8 @@ function AppSidebar() {
     refetchInterval: 60000,
   });
 
-  /* state block */
-
-  const [sidebarWidth, setSidebarWidth] = useState(() => {
-  try {
-    const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
-    return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
-  } catch {
-    return DEFAULT_WIDTH;
-  }
-});
-
-const [sidebarOpen, setSidebarOpen] = useState(() => {
-  try {
-    const saved = localStorage.getItem(SIDEBAR_OPEN_KEY);
-    return saved === null ? true : saved === "true";
-  } catch {
-    return true;
-  }
-});
-
-  /* useEffect */
-  
-  useEffect(() => {
-  try {
-    localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
-  } catch {}
-}, [sidebarWidth]);
-
-useEffect(() => {
-  try {
-    localStorage.setItem(SIDEBAR_OPEN_KEY, String(sidebarOpen));
-  } catch {}
-}, [sidebarOpen]);
-
   return (
-    <Sidebar
-      collapsible="icon"
-      className="border-r border-sidebar-border bg-sidebar/90 backdrop-blur-xl"
-    >
-      /* SidebarProvider */
-      
-      <SidebarProvider
-        open={sidebarOpen}
-        onOpenChange={setSidebarOpen}
-        style={{ "--sidebar-width": `${sidebarWidth}px` } as CSSProperties}
-        >
-        
-        <LayoutContent setSidebarWidth={setSidebarWidth} breadcrumbs={breadcrumbs}>
-          {children}
-        </LayoutContent>
-      </SidebarProvider>
-
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar/90 backdrop-blur-xl">
       <SidebarHeader className="border-b border-sidebar-border/70 px-3 py-3">
         <button
           onClick={() => setLocation("/home")}
@@ -391,12 +296,8 @@ useEffect(() => {
 
           {!isCollapsed && (
             <div className="min-w-0">
-              <p className="text-sm font-semibold tracking-tight truncate">
-                AgentOps
-              </p>
-              <p className="text-[10px] text-muted-foreground truncate">
-                Enterprise agent governance
-              </p>
+              <p className="text-sm font-semibold tracking-tight truncate">AgentOps</p>
+              <p className="text-[10px] text-muted-foreground truncate">Enterprise agent governance</p>
             </div>
           )}
         </button>
@@ -407,12 +308,9 @@ useEffect(() => {
           <div className="mx-3 mb-4 rounded-2xl border border-border/70 bg-gradient-to-br from-primary/12 via-primary/6 to-transparent p-4 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold text-foreground">
-                  Operations Command
-                </p>
+                <p className="text-xs font-semibold text-foreground">Operations Command</p>
                 <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                  Monitor autonomous agents, intervene on exceptions, and keep
-                  every workflow audit-ready.
+                  Monitor autonomous agents, intervene on exceptions, and keep every workflow audit-ready.
                 </p>
               </div>
               <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
@@ -430,11 +328,7 @@ useEffect(() => {
 
             <SidebarMenu className="px-2">
               {group.items.map((item) => {
-                const isActive =
-                  item.path === "/"
-                    ? location === "/"
-                    : location.startsWith(item.path);
-
+                const isActive = item.path === "/" ? location === "/" : location.startsWith(item.path);
                 const isPrimaryAction = item.label === "New Workflow";
 
                 return (
@@ -442,11 +336,7 @@ useEffect(() => {
                     <SidebarMenuButton
                       isActive={isActive}
                       onClick={() => setLocation(item.path)}
-                      className={`h-9 rounded-xl px-3 ${
-                        isPrimaryAction
-                          ? "bg-primary text-white hover:opacity-90"
-                          : ""
-                      }`}
+                      className={`h-9 rounded-xl px-3 ${isPrimaryAction ? "bg-primary text-white hover:opacity-90" : ""}`}
                     >
                       <item.icon
                         className={`h-4 w-4 shrink-0 ${
@@ -490,9 +380,7 @@ useEffect(() => {
                   <Zap className="w-3 h-3 text-violet-400" />
                   <span className="text-xs text-foreground">Make</span>
                 </div>
-                <span className="text-xs font-semibold text-foreground">
-                  {stats?.make ?? "—"}
-                </span>
+                <span className="text-xs font-semibold text-foreground">{stats?.make ?? "—"}</span>
               </div>
 
               <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 px-3 py-2">
@@ -500,9 +388,7 @@ useEffect(() => {
                   <Zap className="w-3 h-3 text-orange-400" />
                   <span className="text-xs text-foreground">n8n</span>
                 </div>
-                <span className="text-xs font-semibold text-foreground">
-                  {stats?.n8n ?? "—"}
-                </span>
+                <span className="text-xs font-semibold text-foreground">{stats?.n8n ?? "—"}</span>
               </div>
             </div>
           </div>
@@ -549,16 +435,22 @@ export interface DashboardLayoutProps {
   breadcrumbs?: { label: string; path?: string }[];
 }
 
-export default function DashboardLayout({
-  children,
-  breadcrumbs,
-}: DashboardLayoutProps) {
+export default function DashboardLayout({ children, breadcrumbs }: DashboardLayoutProps) {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     try {
       const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
       return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
     } catch {
       return DEFAULT_WIDTH;
+    }
+  });
+
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    try {
+      const saved = localStorage.getItem(SIDEBAR_OPEN_KEY);
+      return saved === null ? true : saved === "true";
+    } catch {
+      return true;
     }
   });
 
@@ -570,11 +462,19 @@ export default function DashboardLayout({
     } catch {}
   }, [sidebarWidth]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_OPEN_KEY, String(sidebarOpen));
+    } catch {}
+  }, [sidebarOpen]);
+
   if (loading) return <DashboardLayoutSkeleton />;
   if (!user) return <AuthPanel />;
 
   return (
     <SidebarProvider
+      open={sidebarOpen}
+      onOpenChange={setSidebarOpen}
       style={{ "--sidebar-width": `${sidebarWidth}px` } as CSSProperties}
     >
       <LayoutContent setSidebarWidth={setSidebarWidth} breadcrumbs={breadcrumbs}>
@@ -611,23 +511,23 @@ function LayoutContent({
     (() => {
       const map: Record<string, string> = {
         "/home": "Homepage",
-    "/": "Workspace",
-    "/workflows/new": "New Workflow",
-    "/reports": "Reports",
-    "/performance": "Performance",
-    "/webhooks": "Integrations",
-    "/system-logs": "System Health",
-    "/settings": "Billing & Workspace",
-    "/logs": "Workflow Runs",
-    "/ai-logs": "AI Activity",
-    "/help": "AI Help",
-    };
+        "/": "Workspace",
+        "/workflows/new": "New Workflow",
+        "/reports": "Reports",
+        "/performance": "Performance",
+        "/webhooks": "Integrations",
+        "/system-logs": "System Health",
+        "/settings": "Billing & Workspace",
+        "/logs": "Workflow Runs",
+        "/ai-logs": "AI Activity",
+        "/help": "AI Help",
+      };
 
       const label = map[location];
       if (!label) {
         if (location.startsWith("/workflows/")) {
           return [
-            { label: "Dashboard", path: "/" },
+            { label: "Workspace", path: "/" },
             { label: "Workflow Detail" },
           ];
         }
@@ -687,10 +587,7 @@ function LayoutContent({
           <div className="flex border-b border-border/60 h-12 items-center justify-between bg-background/90 px-3 backdrop-blur sticky top-0 z-40">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="h-7 w-7 rounded-md" />
-              <button
-                onClick={() => setLocation("/home")}
-                className="text-sm font-medium"
-              >
+              <button onClick={() => setLocation("/home")} className="text-sm font-medium">
                 AgentOps
               </button>
             </div>
@@ -709,12 +606,6 @@ function LayoutContent({
         >
           <Sparkles className="w-4 h-4" />
           <span className="text-xs font-medium hidden sm:inline">AI Help</span>
-          <button
-            onClick={() => setLocation("/home")}
-            className="text-sm font-medium"
-            >
-            AgentOps
-          </button>
         </button>
       </SidebarInset>
     </>
