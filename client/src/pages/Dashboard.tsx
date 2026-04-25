@@ -106,9 +106,7 @@ function StatusBadge({ status }: { status: string }) {
   };
 
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border ${c.cls}`}
-    >
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border ${c.cls}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
       {c.label}
     </span>
@@ -218,6 +216,9 @@ function AccessPanel({
   onGoToLogs: () => void;
   onGoToSettings: () => void;
 }) {
+  const analyst = role === "analyst" || role === "admin";
+  const admin = role === "admin";
+
   return (
     <div className="surface-elevated rounded-2xl p-6 card-hover">
       <div className="flex items-center justify-between gap-3 mb-5">
@@ -230,45 +231,51 @@ function AccessPanel({
         <RoleBadge role={role} />
       </div>
 
-      <div
-        onClick={() => setLocation("/workflows/new")}
-        className="rounded-2xl border border-border/70 bg-muted/20 p-4 cursor-pointer hover:bg-primary/10 transition"
+      <div className="space-y-3">
+        <div
+          onClick={onGoToNewWorkflow}
+          className="rounded-2xl border border-border/70 bg-muted/20 p-4 cursor-pointer hover:bg-primary/10 transition"
         >
-        <div className="flex items-center gap-2 mb-2">
-          <Plus className={`w-3.5 h-3.5 ${analyst ? "text-emerald-400" : "text-zinc-500"}`} />
-          <p className="text-xs font-semibold text-foreground">Workflow creation</p>
+          <div className="flex items-center gap-2 mb-2">
+            <Plus className={`w-3.5 h-3.5 ${analyst ? "text-emerald-400" : "text-zinc-500"}`} />
+            <p className="text-xs font-semibold text-foreground">Workflow creation</p>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {analyst
+              ? "Open workflow setup and start a new automation."
+              : "Disabled for viewer accounts."}
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          {analyst ? "Open workflow setup and start a new automation." : "Disabled for viewer accounts."}
-        </p>
-      </div>
-      
-      
-      <div
-        onClick={() => setLocation("/logs")}
-        className="rounded-2xl border border-border/70 bg-muted/20 p-4 cursor-pointer hover:bg-blue-500/10 transition"
+
+        <div
+          onClick={onGoToLogs}
+          className="rounded-2xl border border-border/70 bg-muted/20 p-4 cursor-pointer hover:bg-blue-500/10 transition"
         >
-        <div className="flex items-center gap-2 mb-2">
-          <Bot className={`w-3.5 h-3.5 ${analyst ? "text-emerald-400" : "text-zinc-500"}`} />
-          <p className="text-xs font-semibold text-foreground">Operational logs</p>
+          <div className="flex items-center gap-2 mb-2">
+            <Bot className={`w-3.5 h-3.5 ${analyst ? "text-emerald-400" : "text-zinc-500"}`} />
+            <p className="text-xs font-semibold text-foreground">Operational logs</p>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {analyst
+              ? "Open execution and AI logs to inspect operational activity."
+              : "Read-only dashboard view only."}
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          {analyst ? "Open execution and AI logs to inspect operational activity." : "Read-only dashboard view only."}
-        </p>
-      </div>
-      
-      <div
-        onClick={() => setLocation("/settings")}
-        className="rounded-2xl border border-border/70 bg-muted/20 p-4 cursor-pointer hover:bg-red-500/10 transition"
+
+        <div
+          onClick={onGoToSettings}
+          className="rounded-2xl border border-border/70 bg-muted/20 p-4 cursor-pointer hover:bg-red-500/10 transition"
         >
-        <div className="flex items-center gap-2 mb-2">
-          <Shield className={`w-3.5 h-3.5 ${admin ? "text-emerald-400" : "text-zinc-500"}`} />
-          <p className="text-xs font-semibold text-foreground">Administrative controls</p>
+          <div className="flex items-center gap-2 mb-2">
+            <Shield className={`w-3.5 h-3.5 ${admin ? "text-emerald-400" : "text-zinc-500"}`} />
+            <p className="text-xs font-semibold text-foreground">Administrative controls</p>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {admin
+              ? "Open workspace controls, billing, and governance settings."
+              : "Reserved for admin users only."}
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          {admin ? "Open workspace controls, billing, and governance settings." : "Reserved for admin users only."}
-        </p>
-      </div>
       </div>
     </div>
   );
@@ -289,33 +296,22 @@ function AdminControlPanel({
         <div className="p-2 rounded-2xl bg-red-500/15 ring-1 ring-red-500/10">
           <Shield className="w-4 h-4 text-red-400" />
         </div>
+        <div>
+          <p className="text-sm font-semibold text-foreground">Admin Controls</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            Governance and operational administration
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
         <div
-          onClick={() => setLocation("/logs")}
+          onClick={onGoToLogs}
           className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4 cursor-pointer hover:bg-red-500/10 transition"
-          >
+        >
           <p className="text-xs font-semibold text-foreground mb-1">Status control</p>
           <p className="text-xs text-muted-foreground leading-relaxed">
             Review workflow states, failures, and execution behaviour in the logs view.
-          </p>
-        </div>
-        
-        <div
-          onClick={() => setLocation("/settings")}
-          className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4 cursor-pointer hover:bg-red-500/10 transition"
-          >
-          <p className="text-xs font-semibold text-foreground mb-1">User governance</p>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Manage access, roles, and workspace controls from settings.
-          </p>
-        </div>
-        
-        <div
-          onClick={() => setLocation("/system-logs")}
-          className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4 cursor-pointer hover:bg-red-500/10 transition"
-          >
-          <p className="text-xs font-semibold text-foreground mb-1">Deep diagnostics</p>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Inspect system-level events and platform diagnostics.
           </p>
         </div>
 
@@ -323,11 +319,9 @@ function AdminControlPanel({
           onClick={onGoToSettings}
           className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4 cursor-pointer hover:bg-red-500/10 transition"
         >
-          <p className="text-xs font-semibold text-foreground mb-1">
-            User governance
-          </p>
+          <p className="text-xs font-semibold text-foreground mb-1">User governance</p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Manage access, roles, and administrative controls from settings.
+            Manage access, roles, and workspace controls from settings.
           </p>
         </div>
 
@@ -335,12 +329,9 @@ function AdminControlPanel({
           onClick={onGoToSystemLogs}
           className="rounded-2xl border border-red-500/15 bg-red-500/5 p-4 cursor-pointer hover:bg-red-500/10 transition"
         >
-          <p className="text-xs font-semibold text-foreground mb-1">
-            Deep diagnostics
-          </p>
+          <p className="text-xs font-semibold text-foreground mb-1">Deep diagnostics</p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Inspect system-level events, infrastructure issues, and platform
-            diagnostics.
+            Inspect system-level events, infrastructure issues, and platform diagnostics.
           </p>
         </div>
       </div>
@@ -358,14 +349,10 @@ function InsightsPanel() {
   );
 
   const typeStyle: Record<string, string> = {
-    success:
-      "text-emerald-400 bg-emerald-500/8 border border-emerald-500/15",
-    warning:
-      "text-amber-400 bg-amber-500/8 border border-amber-500/15",
-    info:
-      "text-blue-400 bg-blue-500/8 border border-blue-500/15",
-    error:
-      "text-red-400 bg-red-500/8 border border-red-500/15",
+    success: "text-emerald-400 bg-emerald-500/8 border border-emerald-500/15",
+    warning: "text-amber-400 bg-amber-500/8 border border-amber-500/15",
+    info: "text-blue-400 bg-blue-500/8 border border-blue-500/15",
+    error: "text-red-400 bg-red-500/8 border border-red-500/15",
   };
 
   const typeIcon: Record<string, React.ReactNode> = {
@@ -382,9 +369,7 @@ function InsightsPanel() {
           <Sparkles className="w-4 h-4 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground">
-            AI Governance Insights
-          </p>
+          <p className="text-sm font-semibold text-foreground">AI Governance Insights</p>
           <p className="text-[11px] text-muted-foreground">
             AI-generated · refreshes every 2 minutes
           </p>
@@ -433,9 +418,7 @@ function AnomalyPanel() {
   const [, setLocation] = useLocation();
   const { data: anomalyData, isLoading } = trpc.intelligence.detectAnomalies.useQuery(
     undefined,
-    {
-      refetchInterval: 90000,
-    }
+    { refetchInterval: 90000 }
   );
 
   const anomalies = anomalyData?.anomalies ?? [];
@@ -461,9 +444,7 @@ function AnomalyPanel() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground">Anomaly Alerts</p>
-          <p className="text-[11px] text-muted-foreground">
-            AI-detected governance issues
-          </p>
+          <p className="text-[11px] text-muted-foreground">AI-detected governance issues</p>
         </div>
         {isLoading && (
           <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
@@ -503,9 +484,7 @@ function AnomalyPanel() {
                     {a.type.replace(/_/g, " ")}
                   </span>
                   {a.workflowId !== "SYSTEM" && (
-                    <code className="text-[10px] font-mono opacity-60">
-                      {a.workflowId}
-                    </code>
+                    <code className="text-[10px] font-mono opacity-60">{a.workflowId}</code>
                   )}
                 </div>
                 <p className="text-xs opacity-85 leading-relaxed">{a.message}</p>
@@ -534,9 +513,7 @@ function HealthBar({
   if (!stats || stats.total === 0) {
     return (
       <div className="surface-elevated rounded-2xl p-6">
-        <p className="text-sm font-semibold text-foreground mb-3">
-          Workflow Health
-        </p>
+        <p className="text-sm font-semibold text-foreground mb-3">Workflow Health</p>
         <div className="skeleton h-2 rounded-full" />
       </div>
     );
@@ -590,9 +567,7 @@ function HealthBar({
             <div key={x.label} className="flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${x.color}`} />
               <span className="text-xs text-muted-foreground">{x.label}</span>
-              <span className="text-xs font-semibold text-foreground">
-                {x.count}
-              </span>
+              <span className="text-xs font-semibold text-foreground">{x.count}</span>
             </div>
           ))}
       </div>
@@ -615,9 +590,7 @@ function WorkflowTable({ role }: { role: UserRole }) {
 
   const utils = trpc.useUtils();
   const { data: workflows, isLoading, refetch, isFetching } =
-    trpc.airtable.workflows.useQuery(undefined, {
-      refetchInterval: 60000,
-    });
+    trpc.airtable.workflows.useQuery(undefined, { refetchInterval: 60000 });
 
   const updateStatus = trpc.airtable.updateWorkflowStatus.useMutation({
     onMutate: ({ recordId }) => setUpdatingId(recordId),
@@ -685,7 +658,6 @@ function WorkflowTable({ role }: { role: UserRole }) {
     if (sortKey !== k) {
       return <ChevronDown className="w-3 h-3 text-muted-foreground/40" />;
     }
-
     return sortDir === "asc" ? (
       <ChevronUp className="w-3 h-3 text-primary" />
     ) : (
@@ -752,9 +724,7 @@ function WorkflowTable({ role }: { role: UserRole }) {
               onClick={() => refetch()}
               disabled={isFetching}
             >
-              <RefreshCw
-                className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`}
-              />
+              <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`} />
             </Button>
           </div>
 
@@ -808,10 +778,7 @@ function WorkflowTable({ role }: { role: UserRole }) {
                 ))
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={canAdminister ? 9 : 8}
-                    className="px-4 py-16 text-center"
-                  >
+                  <td colSpan={canAdminister ? 9 : 8} className="px-4 py-16 text-center">
                     <div className="flex flex-col items-center gap-3 text-muted-foreground">
                       <Activity className="w-8 h-8 opacity-30" />
                       <p className="text-sm font-medium">No workflows found</p>
@@ -900,10 +867,7 @@ function WorkflowTable({ role }: { role: UserRole }) {
                     </td>
 
                     {canAdminister && (
-                      <td
-                        className="px-4 py-4"
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -919,10 +883,7 @@ function WorkflowTable({ role }: { role: UserRole }) {
                               )}
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="w-44 rounded-xl"
-                          >
+                          <DropdownMenuContent align="end" className="w-44 rounded-xl">
                             <DropdownMenuLabel className="text-[11px]">
                               Set Status
                             </DropdownMenuLabel>
@@ -996,9 +957,7 @@ export default function Dashboard() {
   const isViewer = !isAnalyst;
 
   const { data: stats, isLoading: statsLoading, dataUpdatedAt } =
-    trpc.airtable.dashboardStats.useQuery(undefined, {
-      refetchInterval: 60000,
-    });
+    trpc.airtable.dashboardStats.useQuery(undefined, { refetchInterval: 60000 });
 
   useEffect(() => {
     if (dataUpdatedAt) setLastSync(new Date(dataUpdatedAt));
@@ -1016,10 +975,7 @@ export default function Dashboard() {
       else if (secs < 3600) setRelativeTime(`${Math.floor(secs / 60)}m ago`);
       else {
         setRelativeTime(
-          lastSync.toLocaleTimeString(undefined, {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
+          lastSync.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
         );
       }
     }
@@ -1036,8 +992,9 @@ export default function Dashboard() {
   };
 
   return (
-    <DashboardLayout breadcrumbs={[{ label: "Dashboard" }]}>
+    <DashboardLayout breadcrumbs={[{ label: "Workspace" }]}>
       <div className="max-w-[1440px] mx-auto space-y-6">
+        {/* Hero */}
         <div className="surface-elevated rounded-3xl p-6 md:p-7 overflow-hidden relative">
           <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.12),transparent_28%),radial-gradient(circle_at_left,rgba(16,185,129,0.06),transparent_20%)]" />
           <div className="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
@@ -1047,61 +1004,11 @@ export default function Dashboard() {
                 Enterprise Agent Governance
               </div>
 
-              <div className="surface-elevated rounded-2xl p-5 border border-blue-500/15 bg-blue-500/5">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-2xl bg-blue-500/10 border border-blue-500/20 shrink-0">
-                    <Sparkles className="w-4 h-4 text-blue-400" />
-                  </div>
-                  
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground">Quick Start</p>
-                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                      This workspace helps you monitor AI agents, workflows, logs, reports, and runtime health without needing to understand the whole system first.
-                    </p>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-                      <button
-                        onClick={() => setLocation("/workflows/new")}
-                        className="rounded-2xl border border-primary/30 bg-primary/10 p-4 text-left hover:bg-primary/15 transition"
-                        >
-                        <p className="text-xs font-semibold text-foreground mb-1">1. Create a workflow</p>
-                        <p className="text-[11px] text-muted-foreground leading-relaxed">
-                          Start building an automation for Make or n8n.
-                        </p>
-                      </button>
-                      
-                      <button
-                        onClick={() => setLocation("/logs")}
-                        className="rounded-2xl border border-border/70 bg-background/30 p-4 text-left hover:bg-accent/20 transition"
-                        >
-                        <p className="text-xs font-semibold text-foreground mb-1">2. Check logs</p>
-                        <p className="text-[11px] text-muted-foreground leading-relaxed">
-                          Understand what happened step by step across workflows and AI actions.
-                        </p>
-                      </button>
-                      
-                      <button
-                        onClick={() => setLocation("/help")}
-                        className="rounded-2xl border border-border/70 bg-background/30 p-4 text-left hover:bg-accent/20 transition"
-                        >
-                        <p className="text-xs font-semibold text-foreground mb-1">3. Use AI Help</p>
-                        <p className="text-[11px] text-muted-foreground leading-relaxed">
-                          Let the app guide you to the right area and explain workflows in plain language.
-                        </p>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
               <div>
-                <h1 className="text-heading text-2xl md:text-3xl">
-                  Governance Dashboard
-                </h1>
+                <h1 className="text-heading text-2xl md:text-3xl">Governance Dashboard</h1>
                 <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-                  Monitor autonomous workflows across Make and n8n, surface
-                  governance exceptions early, and keep every decision path visible,
-                  reviewable, and audit-ready.
+                  Monitor autonomous workflows across Make and n8n, surface governance exceptions
+                  early, and keep every decision path visible, reviewable, and audit-ready.
                 </p>
               </div>
 
@@ -1121,7 +1028,7 @@ export default function Dashboard() {
                 variant="outline"
                 size="sm"
                 onClick={refresh}
-                className="h-9 text-xs gap-1.5 bg-transparent rounded-xl"
+                className="h-9 text-xs gap-1.5 bg-background border-border text-foreground hover:bg-accent rounded-xl"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Refresh
@@ -1131,7 +1038,7 @@ export default function Dashboard() {
                 <Button
                   size="sm"
                   onClick={() => setLocation("/workflows/new")}
-                  className="h-9 text-xs gap-1.5 rounded-xl bg-[var(--primary)] text-white hover:opacity-90"
+                  className="h-9 text-xs gap-1.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   New Workflow
@@ -1141,66 +1048,54 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {user && (
-          <div className="surface-elevated rounded-2xl p-5 border border-blue-500/15 bg-blue-500/5 card-hover">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-2xl bg-blue-500/10 border border-blue-500/20 shrink-0">
-                <Sparkles className="w-4 h-4 text-blue-400" />
-              </div>
+        {/* Quick Start */}
+        <div className="surface-elevated rounded-2xl p-5 border border-blue-500/15 bg-blue-500/5">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-2xl bg-blue-500/10 border border-blue-500/20 shrink-0">
+              <Sparkles className="w-4 h-4 text-blue-500 dark:text-blue-300" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground">Quick Start</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                This workspace helps you monitor AI agents, workflows, logs, reports, and runtime
+                health without needing to understand every technical detail first.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+                <button
+                  onClick={() => setLocation("/workflows/new")}
+                  className="rounded-2xl border border-primary/30 bg-primary/10 p-4 text-left hover:bg-primary/15 transition"
+                >
+                  <p className="text-xs font-semibold text-foreground mb-1">1. Create workflow</p>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Configure a Make or n8n automation.
+                  </p>
+                </button>
 
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">Quick Start</p>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  This workspace helps you monitor AI agents, workflows, logs,
-                  reports, and runtime health without needing to understand every
-                  technical detail first.
-                </p>
+                <button
+                  onClick={() => setLocation("/logs")}
+                  className="rounded-2xl border border-border/70 bg-background/30 p-4 text-left hover:bg-accent/20 transition"
+                >
+                  <p className="text-xs font-semibold text-foreground mb-1">2. Check runs</p>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Review execution status and failures.
+                  </p>
+                </button>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-                  <button
-                    onClick={() => setLocation("/")}
-                    className="rounded-2xl border border-border/70 bg-background/30 p-4 text-left hover:bg-accent/20 transition"
-                  >
-                    <p className="text-xs font-semibold text-foreground mb-1">
-                      1. Review workflows
-                    </p>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Start from the dashboard to see what exists, what is active,
-                      and what needs attention.
-                    </p>
-                  </button>
-
-                  <button
-                    onClick={() => setLocation("/logs")}
-                    className="rounded-2xl border border-border/70 bg-background/30 p-4 text-left hover:bg-accent/20 transition"
-                  >
-                    <p className="text-xs font-semibold text-foreground mb-1">
-                      2. Check logs
-                    </p>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Use execution and AI logs to understand what happened and
-                      where action is needed.
-                    </p>
-                  </button>
-
-                  <button
-                    onClick={() => setLocation("/workflows/new")}
-                    className="rounded-2xl border border-primary/30 bg-primary/10 p-4 text-left hover:bg-primary/15 transition"
-                  >
-                    <p className="text-xs font-semibold text-foreground mb-1">
-                      3. Create your first workflow
-                    </p>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Launch a new agent workflow when you are ready to test or
-                      automate a process.
-                    </p>
-                  </button>
-                </div>
+                <button
+                  onClick={() => setLocation("/help")}
+                  className="rounded-2xl border border-border/70 bg-background/30 p-4 text-left hover:bg-accent/20 transition"
+                >
+                  <p className="text-xs font-semibold text-foreground mb-1">3. Ask GAIA AI</p>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Let the platform guide you to the right area.
+                  </p>
+                </button>
               </div>
             </div>
           </div>
-        )}
+        </div>
 
+        {/* Access Profile */}
         <AccessPanel
           role={role}
           onGoToNewWorkflow={() => setLocation("/workflows/new")}
@@ -1208,6 +1103,7 @@ export default function Dashboard() {
           onGoToSettings={() => setLocation("/settings")}
         />
 
+        {/* Admin Controls */}
         {isAdmin && (
           <AdminControlPanel
             onGoToLogs={() => setLocation("/logs")}
@@ -1216,6 +1112,7 @@ export default function Dashboard() {
           />
         )}
 
+        {/* Quick Actions */}
         <div className="surface-elevated rounded-2xl p-4 md:p-5">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[11px] text-muted-foreground uppercase tracking-[0.16em] font-semibold mr-1">
@@ -1226,7 +1123,7 @@ export default function Dashboard() {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50 rounded-xl"
+                className="h-8 text-xs gap-1.5 bg-background border-border text-foreground hover:bg-accent hover:text-foreground rounded-xl"
                 onClick={() => setLocation("/workflows/new")}
               >
                 <Plus className="w-3 h-3 text-primary" />
@@ -1239,7 +1136,7 @@ export default function Dashboard() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50 rounded-xl"
+                  className="h-8 text-xs gap-1.5 bg-background border-border text-foreground hover:bg-accent rounded-xl"
                   onClick={() => setLocation("/logs")}
                 >
                   <Activity className="w-3 h-3 text-blue-400" />
@@ -1249,7 +1146,7 @@ export default function Dashboard() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50 rounded-xl"
+                  className="h-8 text-xs gap-1.5 bg-background border-border text-foreground hover:bg-accent rounded-xl"
                   onClick={() => setLocation("/ai-logs")}
                 >
                   <Bot className="w-3 h-3 text-purple-400" />
@@ -1261,7 +1158,7 @@ export default function Dashboard() {
             <Button
               variant="outline"
               size="sm"
-              className="h-8 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50 rounded-xl"
+              className="h-8 text-xs gap-1.5 bg-background border-border text-foreground hover:bg-accent rounded-xl"
               onClick={() => setLocation("/reports")}
             >
               <TrendingUp className="w-3 h-3 text-emerald-400" />
@@ -1271,7 +1168,7 @@ export default function Dashboard() {
             <Button
               variant="outline"
               size="sm"
-              className="h-8 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50 rounded-xl"
+              className="h-8 text-xs gap-1.5 bg-background border-border text-foreground hover:bg-accent rounded-xl"
               onClick={() => setLocation("/performance")}
             >
               <Sparkles className="w-3 h-3 text-amber-400" />
@@ -1282,7 +1179,7 @@ export default function Dashboard() {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs gap-1.5 bg-transparent border-border/60 hover:border-primary/50 rounded-xl"
+                className="h-8 text-xs gap-1.5 bg-background border-border text-foreground hover:bg-accent rounded-xl"
                 onClick={() => setLocation("/settings")}
               >
                 <Users className="w-3 h-3 text-red-400" />
@@ -1292,6 +1189,7 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {statsLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
@@ -1327,13 +1225,12 @@ export default function Dashboard() {
           )}
         </div>
 
+        {/* Runtime Distribution + Health + Insights */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
           <div className="surface-elevated rounded-2xl p-6 card-hover">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-sm font-semibold text-foreground">
-                  Runtime Distribution
-                </p>
+                <p className="text-sm font-semibold text-foreground">Runtime Distribution</p>
                 <p className="text-[11px] text-muted-foreground mt-1">
                   Agent activity split by orchestration layer
                 </p>
@@ -1351,18 +1248,8 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-4">
                 {[
-                  {
-                    name: "Make",
-                    count: stats?.make ?? 0,
-                    color: "bg-violet-500",
-                    icon: "text-violet-400",
-                  },
-                  {
-                    name: "n8n",
-                    count: stats?.n8n ?? 0,
-                    color: "bg-orange-500",
-                    icon: "text-orange-400",
-                  },
+                  { name: "Make", count: stats?.make ?? 0, color: "bg-violet-500", icon: "text-violet-400" },
+                  { name: "n8n", count: stats?.n8n ?? 0, color: "bg-orange-500", icon: "text-orange-400" },
                 ].map((rt) => {
                   const pct = stats?.total
                     ? Math.round((rt.count / stats.total) * 100)
@@ -1372,20 +1259,13 @@ export default function Dashboard() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Zap className={`w-3.5 h-3.5 ${rt.icon}`} />
-                          <span className="text-xs font-medium text-foreground">
-                            {rt.name}
-                          </span>
+                          <span className="text-xs font-medium text-foreground">{rt.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold text-foreground">
-                            {rt.count}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground">
-                            {pct}%
-                          </span>
+                          <span className="text-xs font-semibold text-foreground">{rt.count}</span>
+                          <span className="text-[11px] text-muted-foreground">{pct}%</span>
                         </div>
                       </div>
-
                       <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
                         <div
                           className={`h-full ${rt.color} rounded-full transition-all duration-500`}
@@ -1398,9 +1278,7 @@ export default function Dashboard() {
 
                 {stats && (
                   <div className="pt-3 border-t border-border/50 flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">
-                      Success rate
-                    </span>
+                    <span className="text-xs text-muted-foreground">Success rate</span>
                     <span className="text-sm font-semibold text-emerald-400">
                       {stats.total > 0
                         ? `${Math.round((stats.completed / stats.total) * 100)}%`
@@ -1416,19 +1294,18 @@ export default function Dashboard() {
           <InsightsPanel />
         </div>
 
+        {/* Anomaly Alerts */}
         <AnomalyPanel />
 
+        {/* Workflow Registry */}
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold text-foreground">
-                All Workflows
-              </h2>
+              <h2 className="text-sm font-semibold text-foreground">All Workflows</h2>
               <p className="text-xs text-muted-foreground mt-1">
                 Live operational records sourced from Airtable
               </p>
             </div>
-
             <Button
               variant="ghost"
               size="sm"
@@ -1443,18 +1320,16 @@ export default function Dashboard() {
           <WorkflowTable role={role} />
         </div>
 
+        {/* Viewer notice */}
         {isViewer && (
-          <div className="surface-elevated rounded-2xl p-5 border border-blue-500/15 bg-blue-500/5 card-hover">
+          <div className="surface-elevated rounded-2xl p-5 border border-blue-500/15 bg-blue-500/5">
             <div className="flex items-center gap-2 mb-2">
-              <Eye className="w-3.5 h-3.5 text-blue-400" />
-              <p className="text-sm font-semibold text-foreground">
-                Read-only mode
-              </p>
+              <Eye className="w-3.5 h-3.5 text-blue-500 dark:text-blue-300" />
+              <p className="text-sm font-semibold text-foreground">Read-only mode</p>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Viewer accounts can inspect governance summaries, reports,
-              performance trends, and workflow outcomes, but cannot create
-              workflows or perform operational actions.
+              Viewer accounts can inspect governance summaries, reports, performance trends, and
+              workflow outcomes, but cannot create workflows or perform operational actions.
             </p>
           </div>
         )}
