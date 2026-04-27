@@ -1,13 +1,14 @@
 {
-  "name": "agentops-platform",
+  "name": "nexusops-platform",
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
-    "build": "pnpm db:push && vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build": "vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "types:supabase": "npx supabase gen types typescript --project-id dzwppsjnkwnlebnxaehu --schema public > client/src/lib/database.types.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
