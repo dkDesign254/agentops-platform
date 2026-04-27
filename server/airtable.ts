@@ -1,5 +1,5 @@
 /**
- * Airtable API client for the AgentOps Governance Base.
+ * Airtable API client for the AgentOps / NexusOps Governance Base.
  * Base ID: app4DDa3zvaGspOhz
  *
  * Table IDs:
@@ -8,11 +8,23 @@
  *   AI Interaction Log→ tblHHFbZbOMaWJqm5
  *   Performance Data  → tbl7RrluNwF5dfXWd
  *   Final Report      → tbldAOS5h3LUBpCB7
+ *
+ * Credentials come from environment variables only:
+ *   AIRTABLE_API_KEY      — Airtable personal access token
+ *   AIRTABLE_BASE_ID      — Defaults to app4DDa3zvaGspOhz
  */
+import { ENV } from "./_core/env";
 
-const BASE_ID = process.env.AIRTABLE_BASE_ID ?? "app4DDa3zvaGspOhz";
-const API_KEY = process.env.AIRTABLE_API_KEY ?? "";
+const BASE_ID = ENV.airtableBaseId;
 const BASE_URL = `https://api.airtable.com/v0/${BASE_ID}`;
+
+/** Returns the Airtable API key, or throws if not configured. */
+function getApiKey(): string {
+  if (!ENV.airtableApiKey) {
+    throw new Error("[Airtable] AIRTABLE_API_KEY is not set. Add it to your environment variables.");
+  }
+  return ENV.airtableApiKey;
+}
 
 // ─── Generic fetcher ──────────────────────────────────────────────────────────
 
@@ -44,7 +56,7 @@ async function fetchTable<T>(
     if (offset) url.searchParams.set("offset", offset);
     const res = await fetch(url.toString(), {
       headers: {
-        Authorization: `Bearer ${API_KEY}`,
+        Authorization: `Bearer ${getApiKey()}`,
         "Content-Type": "application/json",
       },
     });
@@ -65,7 +77,7 @@ async function fetchTable<T>(
 async function fetchRecord<T>(tableId: string, recordId: string): Promise<AirtableRecord<T>> {
   const res = await fetch(`${BASE_URL}/${tableId}/${recordId}`, {
     headers: {
-      Authorization: `Bearer ${API_KEY}`,
+      Authorization: `Bearer ${getApiKey()}`,
       "Content-Type": "application/json",
     },
   });
@@ -347,7 +359,7 @@ export async function updateWorkflowStatus(
   const res = await fetch(`${BASE_URL}/tblRHBMjoXufOtJLd/${recordId}`, {
     method: "PATCH",
     headers: {
-      Authorization: `Bearer ${API_KEY}`,
+      Authorization: `Bearer ${getApiKey()}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ fields: { Status: status } }),
@@ -376,7 +388,7 @@ export async function approveReport(recordId: string): Promise<AirtableFinalRepo
   const res = await fetch(`${BASE_URL}/tbldAOS5h3LUBpCB7/${recordId}`, {
     method: "PATCH",
     headers: {
-      Authorization: `Bearer ${API_KEY}`,
+      Authorization: `Bearer ${getApiKey()}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ fields: { Approved: true } }),

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git clone *)",
+      "Bash(git checkout *)",
+      "Bash(pnpm install *)",
+      "PowerShell(Get-Command node, npm, pnpm -ErrorAction SilentlyContinue)",
+      "PowerShell($paths = @\\(\"C:\\\\Program Files\\\\nodejs\", \"C:\\\\Program Files \\(x86\\)\\\\nodejs\", \"C:\\\\ProgramData\\\\chocolatey\\\\bin\", \"$env:APPDATA\\\\npm\", \"$env:LOCALAPPDATA\\\\pnpm\"\\); foreach\\($p in $paths\\) { if\\(Test-Path $p\\) { Write-Host \"FOUND: $p\" } })",
+      "PowerShell(Get-ChildItem \"$env:LOCALAPPDATA\\\\Microsoft\\\\WindowsApps\" -ErrorAction SilentlyContinue | Select-Object -First 20 Name; cmd /c \"where node 2>nul\"; cmd /c \"where pnpm 2>nul\"; cmd /c \"where npx 2>nul\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
+    ]
+  }
+}

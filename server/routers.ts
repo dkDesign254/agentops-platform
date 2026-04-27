@@ -6,17 +6,13 @@ import { workflowsRouter } from "./routers/workflows";
 import { logsRouter } from "./routers/logs";
 import { airtableRouter } from "./routers/airtable";
 import { intelligenceRouter } from "./routers/intelligence";
+import { syncRouter } from "./routers/sync";
 import { z } from "zod";
-import { createClient } from "@supabase/supabase-js";
 import { countUsers, getDb, getUserByOpenId, upsertUser } from "./db";
 import { createSessionToken } from "./_core/sdk";
 import { users } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
-
-const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { getSupabaseAdmin, isSupabaseAdminAvailable } from "./src/lib/supabase-admin";
 
 export const appRouter = router({
   system: systemRouter,
@@ -27,38 +23,44 @@ export const appRouter = router({
     register: publicProcedure
       .input(z.object({ email: z.string(), password: z.string(), name: z.string() }))
       .mutation(async ({ input }) => {
-        const { error } = await supabaseAdmin.auth.admin.createUser({
+        const admin = getSupabaseAdmin(); // throws with clear message if not configured
+        const { error } = await admin.auth.admin.createUser({
           email: input.email,
           password: input.password,
           email_confirm: true,
           user_metadata: { name: input.name },
         });
-
         if (error) throw error;
         return { success: true };
       }),
-  
-  requestPasswordReset: publicProcedure
-  .input(z.object({ email: z.string().email() }))
-  .mutation(async ({ input }) => {
-    const { error } = await supabaseAdmin.auth.admin.generateLink({
-      type: "recovery",
-      email: input.email,
-    });
 
-    if (error) throw error;
+    requestPasswordReset: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .mutation(async ({ input }) => {
+        const admin = getSupabaseAdmin();
+        const { error } = await admin.auth.admin.generateLink({
+          type: "recovery",
+          email: input.email,
+        });
+        if (error) throw error;
+        return { success: true, message: "Password reset link generated." };
+      }),
 
-    return {
-      success: true,
-      message: "Password reset link generated.",
-    };
-  }),
-
+    /**
+     * Bridge: exchanges a Supabase access token for a tRPC JWT cookie session.
+     * Call this immediately after supabase.auth.signIn* succeeds on the client.
+     * Without this, protectedProcedure will always return UNAUTHORIZED.
+     */
     exchangeSupabaseSession: publicProcedure
       .input(z.object({ accessToken: z.string() }))
       .mutation(async ({ input, ctx }) => {
-        const { data, error } = await supabaseAdmin.auth.getUser(input.accessToken);
-        if (error || !data.user) throw new Error("Invalid session");
+        if (!isSupabaseAdminAvailable()) {
+          throw new Error("Supabase is not configured on the server. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
+        }
+
+        const admin = getSupabaseAdmin();
+        const { data, error } = await admin.auth.getUser(input.accessToken);
+        if (error || !data.user) throw new Error("Invalid Supabase session");
 
         const openId = data.user.id;
         const existingUser = await getUserByOpenId(openId);
@@ -74,7 +76,7 @@ export const appRouter = router({
         const user = await upsertUser({
           openId,
           email: data.user.email ?? null,
-          name: data.user.user_metadata?.name ?? "User",
+          name: data.user.user_metadata?.name ?? data.user.email?.split("@")[0] ?? "User",
           loginMethod: "supabase",
           role,
         });
@@ -87,7 +89,6 @@ export const appRouter = router({
         });
 
         ctx.res.cookie(COOKIE_NAME, token, getSessionCookieOptions(ctx.req));
-
         return { success: true, user };
       }),
 
@@ -107,7 +108,6 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new Error("Database not available");
-
         await db.update(users).set({ role: input.role }).where(eq(users.openId, input.openId));
         return { success: true };
       }),
@@ -123,6 +123,7 @@ export const appRouter = router({
   logs: logsRouter,
   airtable: airtableRouter,
   intelligence: intelligenceRouter,
+  sync: syncRouter,
 });
 
 export type AppRouter = typeof appRouter;

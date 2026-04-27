@@ -19,6 +19,29 @@ import { Logo } from "@/components/ui/logo";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
 
+/**
+ * Exchanges a Supabase access token for a tRPC JWT cookie session.
+ * This bridges the Supabase Auth session to the server's protectedProcedure
+ * middleware (which reads a JWT cookie, not a Supabase token).
+ * Silently skips if the server endpoint is unavailable.
+ */
+async function bridgeToTrpcSession(accessToken: string): Promise<void> {
+  try {
+    const res = await fetch("/api/trpc/auth.exchangeSupabaseSession", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ "0": { json: { accessToken } } }),
+    });
+    if (!res.ok) {
+      console.warn("[Auth] tRPC session bridge returned", res.status);
+    }
+  } catch (err) {
+    // Non-fatal — Supabase auth still works for client-side data access
+    console.warn("[Auth] tRPC session bridge failed (non-fatal):", err);
+  }
+}
+
 export interface AuthPageProps {
   /** Initial mode — driven by ?mode=signup query param */
   defaultMode?: "signin" | "signup";
@@ -57,17 +80,27 @@ export default function AuthPage({ defaultMode }: AuthPageProps): JSX.Element {
     setLoading(true);
     try {
       if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        // Bridge to tRPC JWT cookie session so protectedProcedures work
+        if (data.session?.access_token) {
+          await bridgeToTrpcSession(data.session.access_token);
+        }
         setLocation("/dashboard");
       } else if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { data: { full_name: fullName } },
         });
         if (error) throw error;
-        toast.success("Account created — check your email to confirm.");
+        // Bridge session if email confirmation is disabled (auto-confirmed)
+        if (data.session?.access_token) {
+          await bridgeToTrpcSession(data.session.access_token);
+          setLocation("/dashboard");
+        } else {
+          toast.success("Account created — check your email to confirm.");
+        }
       } else if (mode === "magic") {
         const { error } = await supabase.auth.signInWithOtp({
           email,

@@ -1,11 +1,12 @@
 /**
  * NexusOps — Supabase database TypeScript types
  *
- * Generated from the Supabase schema. To regenerate after schema changes, run:
- *   pnpm run types:supabase
+ * Manually maintained to match:
+ *   supabase/migrations/001_nexusops_schema.sql
+ *   supabase/migrations/002_sync_tracking.sql
  *
- * This file is committed to source control and should be kept in sync with
- * supabase/migrations/001_nexusops_schema.sql.
+ * To regenerate from live Supabase schema after running migrations:
+ *   pnpm run types:supabase
  */
 
 export type Json =
@@ -62,6 +63,7 @@ export interface Database {
           notes: string | null;
           created_at: string | null;
           user_id: string | null;
+          airtable_record_id: string | null;
         };
         Insert: {
           id?: string;
@@ -79,6 +81,7 @@ export interface Database {
           notes?: string | null;
           created_at?: string | null;
           user_id?: string | null;
+          airtable_record_id?: string | null;
         };
         Update: {
           id?: string;
@@ -96,6 +99,7 @@ export interface Database {
           notes?: string | null;
           created_at?: string | null;
           user_id?: string | null;
+          airtable_record_id?: string | null;
         };
       };
       execution_logs: {
@@ -110,6 +114,7 @@ export interface Database {
           timestamp: string | null;
           message: string | null;
           created_at: string | null;
+          airtable_record_id: string | null;
         };
         Insert: {
           id?: string;
@@ -122,6 +127,7 @@ export interface Database {
           timestamp?: string | null;
           message?: string | null;
           created_at?: string | null;
+          airtable_record_id?: string | null;
         };
         Update: {
           id?: string;
@@ -134,6 +140,7 @@ export interface Database {
           timestamp?: string | null;
           message?: string | null;
           created_at?: string | null;
+          airtable_record_id?: string | null;
         };
       };
       ai_interaction_logs: {
@@ -147,6 +154,7 @@ export interface Database {
           timestamp: string | null;
           cost_notes: string | null;
           created_at: string | null;
+          airtable_record_id: string | null;
         };
         Insert: {
           id?: string;
@@ -158,6 +166,7 @@ export interface Database {
           timestamp?: string | null;
           cost_notes?: string | null;
           created_at?: string | null;
+          airtable_record_id?: string | null;
         };
         Update: {
           id?: string;
@@ -169,6 +178,7 @@ export interface Database {
           timestamp?: string | null;
           cost_notes?: string | null;
           created_at?: string | null;
+          airtable_record_id?: string | null;
         };
       };
       performance_data: {
@@ -184,6 +194,7 @@ export interface Database {
           roas: number | null;
           reporting_period: string | null;
           created_at: string | null;
+          airtable_record_id: string | null;
         };
         Insert: {
           id?: string;
@@ -197,6 +208,7 @@ export interface Database {
           roas?: number | null;
           reporting_period?: string | null;
           created_at?: string | null;
+          airtable_record_id?: string | null;
         };
         Update: {
           id?: string;
@@ -210,6 +222,7 @@ export interface Database {
           roas?: number | null;
           reporting_period?: string | null;
           created_at?: string | null;
+          airtable_record_id?: string | null;
         };
       };
       final_reports: {
@@ -226,6 +239,7 @@ export interface Database {
           approved_at: string | null;
           report_timestamp: string | null;
           created_at: string | null;
+          airtable_record_id: string | null;
         };
         Insert: {
           id?: string;
@@ -240,6 +254,7 @@ export interface Database {
           approved_at?: string | null;
           report_timestamp?: string | null;
           created_at?: string | null;
+          airtable_record_id?: string | null;
         };
         Update: {
           id?: string;
@@ -254,6 +269,7 @@ export interface Database {
           approved_at?: string | null;
           report_timestamp?: string | null;
           created_at?: string | null;
+          airtable_record_id?: string | null;
         };
       };
       platform_config: {
@@ -277,6 +293,50 @@ export interface Database {
           value?: Json;
           description?: string | null;
           updated_at?: string | null;
+        };
+      };
+      sync_log: {
+        Row: {
+          id: string;
+          source: string;
+          started_at: string;
+          completed_at: string | null;
+          status: string;
+          workflows_synced: number | null;
+          exec_logs_synced: number | null;
+          ai_logs_synced: number | null;
+          perf_data_synced: number | null;
+          reports_synced: number | null;
+          error: string | null;
+          details: Json | null;
+        };
+        Insert: {
+          id?: string;
+          source?: string;
+          started_at?: string;
+          completed_at?: string | null;
+          status?: string;
+          workflows_synced?: number | null;
+          exec_logs_synced?: number | null;
+          ai_logs_synced?: number | null;
+          perf_data_synced?: number | null;
+          reports_synced?: number | null;
+          error?: string | null;
+          details?: Json | null;
+        };
+        Update: {
+          id?: string;
+          source?: string;
+          started_at?: string;
+          completed_at?: string | null;
+          status?: string;
+          workflows_synced?: number | null;
+          exec_logs_synced?: number | null;
+          ai_logs_synced?: number | null;
+          perf_data_synced?: number | null;
+          reports_synced?: number | null;
+          error?: string | null;
+          details?: Json | null;
         };
       };
     };

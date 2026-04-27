@@ -8,6 +8,8 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { webhookRouter } from "../webhooks";
+import { runAirtableSync } from "../sync/airtable-sync";
+import { seedIfEmpty } from "../sync/seed-data";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -63,6 +65,40 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
   });
+
+  // ── Post-startup data initialisation (non-blocking) ───────────────────────
+  // Run after server is listening so HTTP is ready before any async work.
+  server.on("listening", () => {
+    void initData();
+  });
+}
+
+/**
+ * Initialises Supabase data on every server start:
+ *  1. Run Airtable → Supabase sync (if both are configured)
+ *  2. If sync produced 0 records (Airtable unavailable or empty),
+ *     fall back to seeding sample data so the dashboard is never blank.
+ */
+async function initData(): Promise<void> {
+  try {
+    console.log("[Init] Starting data initialisation…");
+    const syncResult = await runAirtableSync(true);
+
+    if (syncResult.totalSynced === 0 && !syncResult.ok) {
+      console.log("[Init] Airtable sync produced no records — attempting seed fallback…");
+      const seedResult = await seedIfEmpty();
+      if (seedResult.seeded) {
+        console.log(`[Init] Seeded ${seedResult.workflowsInserted} sample workflows.`);
+      } else {
+        console.log("[Init] Seed skipped (data already present or Supabase unavailable).");
+      }
+    }
+
+    console.log("[Init] Data initialisation complete.");
+  } catch (err: unknown) {
+    // Non-fatal — the server continues running even if init fails
+    console.warn("[Init] Data initialisation failed (non-fatal):", err instanceof Error ? err.message : String(err));
+  }
 }
 
 startServer().catch(console.error);
