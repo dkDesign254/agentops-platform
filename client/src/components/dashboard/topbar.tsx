@@ -4,12 +4,12 @@
  * Dashboard top navigation bar. Shows page title, notification bell,
  * theme toggle, language picker, region picker, and user avatar dropdown.
  */
-import { Bell, ChevronDown, Globe, LogOut, Moon, Settings, Sun, User } from "lucide-react";
+import { Bell, ChevronDown, LogOut, Moon, Settings, Sun, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/contexts/ThemeContext";
-import { LANGUAGES, REGIONS, useLocale, type LanguageCode, type RegionCode } from "@/contexts/LocaleContext";
+import { LANGUAGES, REGIONS, useLocale, useT, type LanguageCode, type RegionCode } from "@/contexts/LocaleContext";
 
 export interface TopBarProps {
   title?: string;
@@ -20,6 +20,7 @@ export function TopBar({ title = "Dashboard", failedCount = 0 }: TopBarProps): J
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { language, region, setLanguage, setRegion } = useLocale();
+  const T = useT();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [regionOpen, setRegionOpen] = useState(false);
@@ -172,14 +173,14 @@ export function TopBar({ title = "Dashboard", failedCount = 0 }: TopBarProps): J
         <button
           onClick={() => { setRegionOpen(!regionOpen); setLangOpen(false); setDropdownOpen(false); }}
           style={iconBtnStyle}
-          title="Region"
+          title={T("region.label")}
         >
-          <Globe size={13} />
+          <span style={{ fontSize: "0.9rem" }}>{currentRegion.flag}</span>
           <span>{currentRegion.code}</span>
           <ChevronDown size={11} style={{ color: "var(--color-text-tertiary)" }} />
         </button>
         {regionOpen && (
-          <div style={{ ...dropdownPanelStyle, minWidth: 180, maxHeight: 280, overflowY: "auto" }}>
+          <div style={{ ...dropdownPanelStyle, minWidth: 190, maxHeight: 280, overflowY: "auto" }}>
             {REGIONS.map((r) => (
               <button
                 key={r.code}
@@ -192,7 +193,7 @@ export function TopBar({ title = "Dashboard", failedCount = 0 }: TopBarProps): J
                 onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-bg-hover)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
               >
-                {r.label}
+                <span style={{ fontSize: "0.9rem" }}>{r.flag}</span> {r.label}
               </button>
             ))}
           </div>
@@ -294,8 +295,8 @@ export function TopBar({ title = "Dashboard", failedCount = 0 }: TopBarProps): J
         {dropdownOpen && (
           <div style={dropdownPanelStyle}>
             {[
-              { icon: <User size={14} />, label: "Profile", action: () => setLocation("/settings") },
-              { icon: <Settings size={14} />, label: "Settings", action: () => setLocation("/settings") },
+              { icon: <User size={14} />, label: T("topbar.profile"), action: () => setLocation("/settings") },
+              { icon: <Settings size={14} />, label: T("topbar.settings"), action: () => setLocation("/settings") },
             ].map((item) => (
               <button
                 key={item.label}
@@ -314,7 +315,7 @@ export function TopBar({ title = "Dashboard", failedCount = 0 }: TopBarProps): J
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-bg-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
             >
-              <LogOut size={14} /> Sign out
+              <LogOut size={14} /> {T("topbar.signOut")}
             </button>
           </div>
         )}

@@ -4,55 +4,14 @@
  * Collapsible navigation sidebar for the authenticated dashboard.
  * Organised into four sections: Monitor, Audit, Output, Settings.
  * Active route highlighted with brand accent + left border.
+ * Labels update when the user switches language via LocaleContext.
  */
 import type { ReactNode } from "react";
 import { useLocation } from "wouter";
 import { Logo } from "@/components/ui/logo";
 import { LayoutDashboard, Workflow, ScrollText, Bot, FileText, BarChart3, Settings, Users, Plug, Key, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: ReactNode;
-}
-
-interface NavSection {
-  title: string;
-  items: NavItem[];
-}
-
-const NAV: NavSection[] = [
-  {
-    title: "Monitor",
-    items: [
-      { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard size={16} /> },
-      { label: "Workflows", href: "/workflows", icon: <Workflow size={16} /> },
-    ],
-  },
-  {
-    title: "Audit",
-    items: [
-      { label: "Execution Logs", href: "/audit", icon: <ScrollText size={16} /> },
-      { label: "AI Interactions", href: "/ai-interactions", icon: <Bot size={16} /> },
-    ],
-  },
-  {
-    title: "Output",
-    items: [
-      { label: "Final Reports", href: "/reports", icon: <FileText size={16} /> },
-      { label: "Campaign Data", href: "/performance", icon: <BarChart3 size={16} /> },
-    ],
-  },
-  {
-    title: "Settings",
-    items: [
-      { label: "Team", href: "/settings", icon: <Users size={16} /> },
-      { label: "Integrations", href: "/settings", icon: <Plug size={16} /> },
-      { label: "API Keys", href: "/settings", icon: <Key size={16} /> },
-    ],
-  },
-];
+import { useT } from "@/contexts/LocaleContext";
 
 export interface SidebarProps {
   collapsed?: boolean;
@@ -67,28 +26,83 @@ export function Sidebar({ collapsed = false, onCollapse }: SidebarProps): JSX.El
     if (onCollapse) onCollapse(!collapsed);
     else setInternalCollapsed(!internalCollapsed);
   };
+  const T = useT();
+
+  const NAV = [
+    {
+      title: T("nav.monitor"),
+      items: [
+        { label: T("nav.dashboard"), href: "/dashboard", icon: <LayoutDashboard size={16} /> },
+        { label: T("nav.workflows"), href: "/workflows", icon: <Workflow size={16} /> },
+      ],
+    },
+    {
+      title: T("nav.audit"),
+      items: [
+        { label: T("nav.execLogs"), href: "/audit", icon: <ScrollText size={16} /> },
+        { label: T("nav.aiInteractions"), href: "/ai-interactions", icon: <Bot size={16} /> },
+      ],
+    },
+    {
+      title: T("nav.output"),
+      items: [
+        { label: T("nav.finalReports"), href: "/reports", icon: <FileText size={16} /> },
+        { label: T("nav.campaignData"), href: "/performance", icon: <BarChart3 size={16} /> },
+      ],
+    },
+    {
+      title: T("nav.settings"),
+      items: [
+        { label: T("nav.team"), href: "/settings", icon: <Users size={16} /> },
+        { label: T("nav.integrations"), href: "/settings", icon: <Plug size={16} /> },
+        { label: T("nav.apiKeys"), href: "/settings", icon: <Key size={16} /> },
+      ],
+    },
+  ];
 
   return (
-    <aside style={{
-      width: isCollapsed ? 60 : 220,
-      minHeight: "100vh",
-      background: "var(--color-bg-surface)",
-      borderRight: "1px solid var(--color-border-subtle)",
-      display: "flex",
-      flexDirection: "column",
-      transition: "width var(--transition-base)",
-      flexShrink: 0,
-      position: "relative",
-    }}>
+    <aside
+      style={{
+        width: isCollapsed ? 60 : 220,
+        minHeight: "100vh",
+        background: "var(--color-bg-surface)",
+        borderRight: "1px solid var(--color-border-subtle)",
+        display: "flex",
+        flexDirection: "column",
+        transition: "width var(--transition-base)",
+        flexShrink: 0,
+        position: "relative",
+      }}
+    >
       {/* Logo area */}
-      <div style={{ padding: "var(--space-5) var(--space-4)", borderBottom: "1px solid var(--color-border-subtle)", display: "flex", alignItems: "center", justifyContent: isCollapsed ? "center" : "space-between" }}>
+      <div
+        style={{
+          padding: "var(--space-5) var(--space-4)",
+          borderBottom: "1px solid var(--color-border-subtle)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: isCollapsed ? "center" : "space-between",
+        }}
+      >
         {!isCollapsed && <Logo size="sm" />}
         {isCollapsed && (
           <div style={{ width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <span style={{ color: "var(--color-brand)", fontSize: "1rem" }}>⬡</span>
           </div>
         )}
-        <button onClick={toggle} style={{ background: "none", border: "1px solid var(--color-border-subtle)", borderRadius: "var(--radius-sm)", padding: "0.2rem", color: "var(--color-text-tertiary)", cursor: "pointer", display: "flex", alignItems: "center" }}>
+        <button
+          onClick={toggle}
+          style={{
+            background: "none",
+            border: "1px solid var(--color-border-subtle)",
+            borderRadius: "var(--radius-sm)",
+            padding: "0.2rem",
+            color: "var(--color-text-tertiary)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
         </button>
       </div>
@@ -98,14 +112,27 @@ export function Sidebar({ collapsed = false, onCollapse }: SidebarProps): JSX.El
         {NAV.map((section) => (
           <div key={section.title} style={{ marginBottom: "var(--space-5)" }}>
             {!isCollapsed && (
-              <p style={{ fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-text-tertiary)", padding: "0 var(--space-2)", marginBottom: "var(--space-2)", fontFamily: "var(--font-display)" }}>
+              <p
+                style={{
+                  fontSize: "0.625rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "var(--color-text-tertiary)",
+                  padding: "0 var(--space-2)",
+                  marginBottom: "var(--space-2)",
+                  fontFamily: "var(--font-display)",
+                }}
+              >
                 {section.title}
               </p>
             )}
             {section.items.map((item) => {
               const isActive = location === item.href;
               return (
-                <button key={item.label + item.href} onClick={() => setLocation(item.href)}
+                <button
+                  key={item.label + item.href}
+                  onClick={() => setLocation(item.href)}
                   title={isCollapsed ? item.label : undefined}
                   style={{
                     display: "flex",
@@ -125,7 +152,8 @@ export function Sidebar({ collapsed = false, onCollapse }: SidebarProps): JSX.El
                     fontWeight: isActive ? 600 : 400,
                     transition: "all var(--transition-fast)",
                     marginBottom: 2,
-                  }}>
+                  }}
+                >
                   {item.icon}
                   {!isCollapsed && item.label}
                 </button>
