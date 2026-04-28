@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
+import { t as translate, type TranslationKey } from "@/i18n/translations";
+export type { TranslationKey };
 
 export const LANGUAGES = [
   { code: "en", label: "English", flag: "🇬🇧" },
@@ -9,21 +11,21 @@ export const LANGUAGES = [
 ] as const;
 
 export const REGIONS = [
-  { code: "KE", label: "Kenya" },
-  { code: "NG", label: "Nigeria" },
-  { code: "ZA", label: "South Africa" },
-  { code: "GH", label: "Ghana" },
-  { code: "TZ", label: "Tanzania" },
-  { code: "UG", label: "Uganda" },
-  { code: "RW", label: "Rwanda" },
-  { code: "ET", label: "Ethiopia" },
-  { code: "GB", label: "United Kingdom" },
-  { code: "US", label: "United States" },
-  { code: "FR", label: "France" },
-  { code: "DE", label: "Germany" },
-  { code: "IN", label: "India" },
-  { code: "BR", label: "Brazil" },
-  { code: "OTHER", label: "Other" },
+  { code: "KE", label: "Kenya", flag: "🇰🇪" },
+  { code: "NG", label: "Nigeria", flag: "🇳🇬" },
+  { code: "ZA", label: "South Africa", flag: "🇿🇦" },
+  { code: "GH", label: "Ghana", flag: "🇬🇭" },
+  { code: "TZ", label: "Tanzania", flag: "🇹🇿" },
+  { code: "UG", label: "Uganda", flag: "🇺🇬" },
+  { code: "RW", label: "Rwanda", flag: "🇷🇼" },
+  { code: "ET", label: "Ethiopia", flag: "🇪🇹" },
+  { code: "GB", label: "United Kingdom", flag: "🇬🇧" },
+  { code: "US", label: "United States", flag: "🇺🇸" },
+  { code: "FR", label: "France", flag: "🇫🇷" },
+  { code: "DE", label: "Germany", flag: "🇩🇪" },
+  { code: "IN", label: "India", flag: "🇮🇳" },
+  { code: "BR", label: "Brazil", flag: "🇧🇷" },
+  { code: "OTHER", label: "Other", flag: "🌍" },
 ] as const;
 
 export type LanguageCode = (typeof LANGUAGES)[number]["code"];
@@ -75,4 +77,10 @@ export function useLocale() {
   const ctx = useContext(LocaleContext);
   if (!ctx) throw new Error("useLocale must be used within LocaleProvider");
   return ctx;
+}
+
+/** Translation helper bound to the current language */
+export function useT() {
+  const { language } = useLocale();
+  return (key: TranslationKey) => translate(language, key);
 }
