@@ -16,6 +16,7 @@ import { RecentWorkflows } from "@/components/dashboard/recent-workflows";
 import { QuickStats } from "@/components/dashboard/quick-stats";
 import { useDashboardMetrics } from "@/hooks/use-dashboard-metrics";
 import { useWorkflows } from "@/hooks/use-workflows";
+import { useT } from "@/contexts/LocaleContext";
 import type { WorkflowRow } from "@/components/dashboard/recent-workflows";
 import type { ExecutionDot } from "@/components/dashboard/governance-health";
 
@@ -23,10 +24,11 @@ export default function DashboardPage(): JSX.Element {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { metrics, quickStats, loading: metricsLoading } = useDashboardMetrics();
   const { data: workflows, loading: wfLoading } = useWorkflows();
+  const T = useT();
 
   // Map last 10 workflows to execution dots for the governance health timeline
   const recentDots: ExecutionDot[] = workflows.slice(0, 10).map((wf) => ({
-    workflowId: wf.workflow_id,
+    workflowId: wf.workflow_id ?? wf.id,
     status: (wf.status?.toLowerCase() ?? "pending") as ExecutionDot["status"],
     timestamp: wf.date_requested ?? wf.created_at ?? "",
   }));
@@ -37,8 +39,8 @@ export default function DashboardPage(): JSX.Element {
   // Map workflows to table rows
   const tableRows: WorkflowRow[] = workflows.slice(0, 10).map((wf) => ({
     id: wf.id,
-    workflowId: wf.workflow_id,
-    workflowName: wf.workflow_name,
+    workflowId: wf.workflow_id ?? wf.id,
+    workflowName: wf.workflow_name ?? "—",
     runtime: wf.runtime_used,
     status: wf.status ?? "Pending",
     reportPeriod: wf.report_period,
@@ -54,7 +56,7 @@ export default function DashboardPage(): JSX.Element {
 
       {/* Main content */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        <TopBar title="Dashboard" failedCount={metrics.failed} />
+        <TopBar title={T("nav.dashboard")} failedCount={metrics.failed} />
 
         <main style={{ flex: 1, overflowY: "auto", padding: "var(--space-6)" }}>
           <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
@@ -62,10 +64,10 @@ export default function DashboardPage(): JSX.Element {
             {/* Welcome */}
             <div>
               <h1 style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 700, color: "var(--color-text-primary)", letterSpacing: "-0.02em", marginBottom: "0.25rem" }}>
-                Governance command centre
+                {T("dash.title")}
               </h1>
               <p style={{ fontSize: "0.875rem", color: "var(--color-text-secondary)" }}>
-                Real-time overview of every AI workflow running under NexusOps governance.
+                {T("dash.subtitle")}
               </p>
             </div>
 
