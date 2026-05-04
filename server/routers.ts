@@ -68,11 +68,15 @@ export const appRouter = router({
         const existingUser = await getUserByOpenId(openId);
         const totalUsers = await countUsers();
 
-        let role = existingUser?.role;
-        if (!existingUser) {
+        // Non-NexusOps roles (e.g. Supabase default "authenticated") are treated as unset
+        const NEXUSOPS_ROLES = ["admin", "analyst", "viewer"];
+        const currentRole = existingUser?.role;
+        const hasValidRole = currentRole && NEXUSOPS_ROLES.includes(currentRole);
+
+        let role = hasValidRole ? currentRole : undefined;
+        if (!existingUser || !hasValidRole) {
+          // First user ever → admin, otherwise viewer
           role = totalUsers === 0 ? "admin" : "viewer";
-        } else if (existingUser.role === "user") {
-          role = totalUsers === 1 ? "admin" : "analyst";
         }
 
         const user = await upsertUser({
