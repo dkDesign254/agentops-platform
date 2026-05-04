@@ -221,16 +221,35 @@ export async function seedIfEmpty(): Promise<{ seeded: boolean; workflowsInserte
 
     await db.from("execution_logs").insert(logRows);
 
-    // Insert AI log for completed/running workflows that have an ai_call step
+    // Insert AI logs — 2 per completed workflow, 1 for running, none for failed
     if (!isFailed) {
+      // Primary report generation log
       await db.from("ai_interaction_logs").insert({
         log_display_id: `AI-${wf.workflow_id}-001`,
         workflow_id: supabaseId,
         prompt_text: `You are a senior marketing analyst AI. Generate a structured Weekly Marketing Performance Report for the workflow requested by "Dustine Kibagendi".\n\nThe report must be a valid JSON object with keys: summary, insights, risks, recommendation.\n\nBase the content on realistic marketing KPIs: CTR, ROAS, conversion rates, spend efficiency, audience engagement, and channel performance.\nReturn ONLY the JSON object.`,
         response_text: `{"summary":"Campaign performance for ${wf.workflow_id} showed a 3.2% CTR across Google and Meta placements, with ROAS of 4.1x exceeding the 3.5x target. Total spend was £12,400 across 3 active campaigns.","insights":"Google Search delivered the highest ROAS at 5.2x.\\nMeta Retargeting drove 68% of conversions despite 22% of spend.\\nMobile CTR outperformed desktop by 1.4x.\\nWeekend engagement dropped 31% versus weekdays.","risks":"Email nurture sequence shows declining open rates (-8% WoW) suggesting audience fatigue.\\nLinkedIn campaign underperforming at 0.9% CTR against 1.5% benchmark.\\nDisplay spend consuming 18% of budget with <1% contribution to conversions.","recommendation":"Reallocate 40% of display budget to Google Search based on ROAS differential.\\nPause LinkedIn campaign pending creative refresh.\\nRun A/B test on email subject lines to address declining open rates.\\nIncrease mobile bid adjustments by 15% on Google Search."}`,
         model_used: "gemini-2.5-flash",
+        tokens_used: 847,
+        confidence: 0.88,
+        flagged: false,
         timestamp: baseTime(wf.workflow_id, 4 * 6 * 60_000),
       });
+
+      // Secondary anomaly detection log (for completed workflows only)
+      if (wf.status === "Completed") {
+        await db.from("ai_interaction_logs").insert({
+          log_display_id: `AI-${wf.workflow_id}-002`,
+          workflow_id: supabaseId,
+          prompt_text: `Analyse the following campaign metrics for statistical anomalies and governance risks. Identify any metrics that deviate more than 2 standard deviations from the 4-week baseline. Report as JSON: {anomalies: [], risk_level: "low|medium|high", recommended_action: ""}`,
+          response_text: `{"anomalies":["LinkedIn CTR at 0.9% is 40% below the 1.5% benchmark","Display conversion rate of 0.015% is 3 sigma below baseline","Email open rate decline of -8% WoW accelerating"],"risk_level":"medium","recommended_action":"Flag LinkedIn and Display campaigns for immediate creative review. Escalate email list health assessment to CRM team. No immediate budget action required — monitor next 2 cycles."}`,
+          model_used: "gemini-2.5-flash",
+          tokens_used: 312,
+          confidence: 0.74,
+          flagged: wf.workflow_id === "WF-2026-002", // Flag one for demo purposes
+          timestamp: baseTime(wf.workflow_id, 5 * 6 * 60_000),
+        });
+      }
     }
   }
 
@@ -251,14 +270,15 @@ export async function seedIfEmpty(): Promise<{ seeded: boolean; workflowsInserte
   // Insert final reports for completed workflows
   const completedWfs = (insertedWorkflows ?? []).filter((w) => w.status === "Completed");
   const reportRows = completedWfs.map((wf) => ({
-    report_display_id:  `RPT-${wf.workflow_id}`,
-    workflow_id:         wf.id,
-    executive_summary:   `Governance run ${wf.workflow_id} completed successfully. All 7 execution steps traced and logged. AI-generated report reviewed and approved by platform admin.`,
-    key_insights:        `Google Search maintained the highest ROAS at 5.2x.\nMobile conversions outpaced desktop by 38%.\nMeta Retargeting provided strongest conversion volume relative to spend.\nWeekend engagement gap represents an optimisation opportunity.`,
-    risks_or_anomalies:  `LinkedIn underperformance (0.9% CTR vs 1.5% benchmark) flagged for creative review.\nEmail open rate decline (-8% WoW) indicates potential audience fatigue.\nDisplay network contributing <2% of conversions despite 18% spend allocation.`,
-    recommendation:      `Reallocate display budget to Google Search.\nPause LinkedIn pending creative refresh.\nA/B test email subject lines.\nIncrease mobile bid adjustments by 15%.`,
-    approved:            wf.workflow_id !== "WF-2026-005",
-    report_timestamp:    SEED_WORKFLOWS.find((s) => workflowMap.get(s.workflow_id) === (wf.id as string))?.date_completed ?? null,
+    report_display_id:   `RPT-${wf.workflow_id}`,
+    workflow_id:          wf.id,
+    executive_summary:    `Governance run ${wf.workflow_id} completed successfully. All 7 execution steps traced and logged. AI-generated report reviewed and approved by platform admin. Campaign performance exceeded ROAS targets with notable mobile conversion uplift.`,
+    key_insights:         `Google Search maintained the highest ROAS at 5.2x, significantly above the 3.5x target.\nMobile conversions outpaced desktop by 38% — mobile bid adjustments recommended.\nMeta Retargeting provided strongest conversion volume (68%) relative to spend (22%).\nWeekend engagement gap of 31% represents a scheduling optimisation opportunity.\nDisplay network ROI remains negative after cost attribution.`,
+    risks_or_anomalies:   `LinkedIn underperformance (0.9% CTR vs 1.5% benchmark) flagged for creative review.\nEmail open rate decline (-8% WoW) indicates potential audience fatigue.\nDisplay network contributing <2% of conversions despite 18% spend allocation.\nAI anomaly detection flagged 3 metrics deviating >2 standard deviations from baseline.`,
+    recommendation:       `Reallocate 40% of display budget to Google Search based on ROAS differential.\nPause LinkedIn campaign pending creative refresh — estimate 2-week turnaround.\nRun A/B test on email subject lines targeting 15% open rate recovery.\nIncrease mobile bid adjustments by 15% on Google Search.\nSchedule weekend campaign pause test for 2 cycles to measure impact.`,
+    action_items:         `1. Creative team: Refresh LinkedIn ad copy and visuals by 2026-05-01\n2. PPC team: Implement -40% display budget reallocation in Google Ads by EOW\n3. Email team: Brief A/B subject line test for next send cycle\n4. Analytics: Add weekend vs weekday bid modifier test to campaign settings\n5. Manager review: Approve mobile bid adjustment of +15% on Google Search`,
+    approved:             wf.workflow_id !== "WF-2026-005",
+    report_timestamp:     SEED_WORKFLOWS.find((s) => workflowMap.get(s.workflow_id) === (wf.id as string))?.date_completed ?? null,
   }));
 
   if (reportRows.length > 0) {
