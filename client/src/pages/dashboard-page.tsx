@@ -8,12 +8,17 @@
  * Route: /dashboard (protected — requires auth session)
  */
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { TopBar } from "@/components/dashboard/topbar";
 import { MetricsRow } from "@/components/dashboard/metrics-row";
 import { GovernanceHealth } from "@/components/dashboard/governance-health";
 import { RecentWorkflows } from "@/components/dashboard/recent-workflows";
 import { QuickStats } from "@/components/dashboard/quick-stats";
+import { GovernanceScoreGauge } from "@/components/dashboard/governance-score-gauge";
+import { ExecutionTimelineChart } from "@/components/dashboard/execution-timeline-chart";
+import { RuntimeSplitChart } from "@/components/dashboard/runtime-split-chart";
+import { AnomalyAlerts } from "@/components/dashboard/anomaly-alerts";
 import { useDashboardMetrics } from "@/hooks/use-dashboard-metrics";
 import { useWorkflows } from "@/hooks/use-workflows";
 import { useT } from "@/contexts/LocaleContext";
@@ -25,6 +30,7 @@ export default function DashboardPage(): JSX.Element {
   const { metrics, quickStats, loading: metricsLoading } = useDashboardMetrics();
   const { data: workflows, loading: wfLoading } = useWorkflows();
   const T = useT();
+  const [, navigate] = useLocation();
 
   // Map last 10 workflows to execution dots for the governance health timeline
   const recentDots: ExecutionDot[] = workflows.slice(0, 10).map((wf) => ({
@@ -105,6 +111,30 @@ export default function DashboardPage(): JSX.Element {
               reportsPendingApproval={quickStats.reportsPendingApproval}
               avgDurationMins={quickStats.avgDurationMins}
             />
+
+            {/* Analytics row: Governance gauge + Anomaly alerts */}
+            {!wfLoading && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)" }}>
+                <GovernanceScoreGauge
+                  totalWorkflows={metrics.total}
+                  completedWorkflows={metrics.completed}
+                  failedWorkflows={metrics.failed}
+                  totalReports={quickStats.reportsPendingApproval}
+                  approvedReports={0}
+                  workflowsWithLogs={workflows.filter((w) => (w.log_count ?? 0) > 0).length}
+                  workflowsWithAiLogs={0}
+                />
+                <AnomalyAlerts workflows={workflows} onNavigate={navigate} />
+              </div>
+            )}
+
+            {/* Charts row: Execution timeline + Runtime split */}
+            {!wfLoading && (
+              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "var(--space-4)" }}>
+                <ExecutionTimelineChart workflows={workflows} />
+                <RuntimeSplitChart workflows={workflows} />
+              </div>
+            )}
           </div>
         </main>
       </div>

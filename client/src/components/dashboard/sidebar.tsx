@@ -9,7 +9,7 @@
 import type { ReactNode } from "react";
 import { useLocation } from "wouter";
 import { Logo } from "@/components/ui/logo";
-import { LayoutDashboard, Workflow, ScrollText, Bot, FileText, BarChart3, Settings, Users, Plug, Key, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { LayoutDashboard, Workflow, ScrollText, Bot, FileText, BarChart3, Settings, Users, Plug, Key, ChevronLeft, ChevronRight, Sparkles, CreditCard, Link2 } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/contexts/LocaleContext";
 
@@ -51,11 +51,16 @@ export function Sidebar({ collapsed = false, onCollapse }: SidebarProps): JSX.El
       ],
     },
     {
-      title: T("nav.settings"),
+      title: T("nav.connect"),
       items: [
-        { label: T("nav.team"), href: "/settings", icon: <Users size={16} /> },
-        { label: T("nav.integrations"), href: "/settings", icon: <Plug size={16} /> },
-        { label: T("nav.apiKeys"), href: "/settings", icon: <Key size={16} /> },
+        { label: T("nav.integrations"), href: "/integrations", icon: <Link2 size={16} /> },
+      ],
+    },
+    {
+      title: T("nav.account"),
+      items: [
+        { label: T("nav.billing"), href: "/billing", icon: <CreditCard size={16} /> },
+        { label: T("nav.settings"), href: "/settings", icon: <Settings size={16} /> },
       ],
     },
   ];

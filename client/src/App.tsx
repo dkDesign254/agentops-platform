@@ -11,12 +11,13 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LocaleProvider } from "./contexts/LocaleContext";
 import { AuthGuard } from "./components/auth/auth-guard";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
+import { GaiaBubble, GaiaPanel } from "./components/gaia";
 
 // Public pages
 import LandingPage from "./pages/landing-page";
@@ -32,6 +33,8 @@ const ReportsPage = lazy(() => import("./pages/reports-page"));
 const PerformancePage = lazy(() => import("./pages/performance-page"));
 const SettingsPage = lazy(() => import("./pages/settings-page"));
 const GAIAPage = lazy(() => import("./pages/gaia-page"));
+const IntegrationsPage = lazy(() => import("./pages/integrations-page"));
+const BillingPage = lazy(() => import("./pages/billing-page"));
 
 /** Suspense fallback used while lazy protected pages are loading */
 function PageLoader(): JSX.Element {
@@ -159,6 +162,21 @@ function Router(): JSX.Element {
         </AuthGuard>
       </Route>
 
+      <Route path="/integrations">
+        <AuthGuard>
+          <Suspense fallback={<PageLoader />}>
+            <IntegrationsPage />
+          </Suspense>
+        </AuthGuard>
+      </Route>
+      <Route path="/billing">
+        <AuthGuard>
+          <Suspense fallback={<PageLoader />}>
+            <BillingPage />
+          </Suspense>
+        </AuthGuard>
+      </Route>
+
       {/* Catch-all */}
       <Route component={NotFoundPage} />
     </Switch>
@@ -168,11 +186,20 @@ function Router(): JSX.Element {
 function AppShell(): JSX.Element {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const [gaiaOpen, setGaiaOpen] = useState(false);
+  const [location] = useLocation();
+  const isPublicRoute = location === "/" || location === "/auth";
 
   return (
     <TooltipProvider>
       <Toaster theme={isDark ? "dark" : "light"} />
       <Router />
+      {!isPublicRoute && (
+        <>
+          <GaiaBubble isOpen={gaiaOpen} onToggle={() => setGaiaOpen((o) => !o)} />
+          <GaiaPanel isOpen={gaiaOpen} onClose={() => setGaiaOpen(false)} />
+        </>
+      )}
     </TooltipProvider>
   );
 }

@@ -4,7 +4,7 @@ export type TranslationKey =
   | "nav.audit" | "nav.execLogs" | "nav.aiInteractions"
   | "nav.output" | "nav.finalReports" | "nav.campaignData"
   | "nav.settings" | "nav.team" | "nav.integrations" | "nav.apiKeys"
-  | "nav.gaiaAi"
+  | "nav.gaiaAi" | "nav.connect" | "nav.account" | "nav.billing"
   // Dashboard
   | "dash.title" | "dash.subtitle"
   | "dash.totalWorkflows" | "dash.completed" | "dash.failed" | "dash.pending"
@@ -114,6 +114,9 @@ const en: Translations = {
   "search.workflows": "Search workflows…",
   "region.label": "Region",
   "nav.gaiaAi": "GAIA AI",
+  "nav.connect": "Connect",
+  "nav.account": "Account",
+  "nav.billing": "Billing",
   "tbl.time": "Time",
   "tbl.logId": "Log ID",
   "tbl.event": "Event",
@@ -257,6 +260,9 @@ const sw: Translations = {
   "search.workflows": "Tafuta mtiririko wa kazi…",
   "region.label": "Mkoa",
   "nav.gaiaAi": "GAIA AI",
+  "nav.connect": "Unganisha",
+  "nav.account": "Akaunti",
+  "nav.billing": "Bili",
   "tbl.time": "Wakati",
   "tbl.logId": "Kitambulisho cha Kumbukumbu",
   "tbl.event": "Tukio",
@@ -400,6 +406,9 @@ const fr: Translations = {
   "search.workflows": "Rechercher des flux…",
   "region.label": "Région",
   "nav.gaiaAi": "GAIA AI",
+  "nav.connect": "Connecter",
+  "nav.account": "Compte",
+  "nav.billing": "Facturation",
   "tbl.time": "Heure",
   "tbl.logId": "ID du journal",
   "tbl.event": "Événement",
@@ -543,6 +552,9 @@ const pt: Translations = {
   "search.workflows": "Pesquisar fluxos…",
   "region.label": "Região",
   "nav.gaiaAi": "GAIA AI",
+  "nav.connect": "Conectar",
+  "nav.account": "Conta",
+  "nav.billing": "Faturação",
   "tbl.time": "Hora",
   "tbl.logId": "ID do log",
   "tbl.event": "Evento",
@@ -686,6 +698,9 @@ const es: Translations = {
   "search.workflows": "Buscar flujos…",
   "region.label": "Región",
   "nav.gaiaAi": "GAIA AI",
+  "nav.connect": "Conectar",
+  "nav.account": "Cuenta",
+  "nav.billing": "Facturación",
   "tbl.time": "Hora",
   "tbl.logId": "ID de registro",
   "tbl.event": "Evento",
